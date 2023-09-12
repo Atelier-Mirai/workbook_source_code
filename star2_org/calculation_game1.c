@@ -8,12 +8,12 @@ int main(int argc, char const *argv[]) {
   int operation_result; // 演算結果
   int your_answer;      // 回答
   int correct_answer;   // 正答数
-  int n;                // 繰り返し回数 n 回目
+  int i;
 
   correct_answer = 0; // 10問中何問正解か数えるために、初期化します。
   // 1 回目、2 回目 と表示させたいので、
-  // for (n = 1; n <= 10; n++) と書いているところに着目して下さい。
-  for (n = 1; n <= 10; n++) {
+  // for (i = 1; i <= 10; i++) と書いているところに着目して下さい。
+  for (i = 1; i <= 10; i++) {
     // 出題処理
     operand1 = random_number(10);
     // 二つの０〜９までの数を用意します。

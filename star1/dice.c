@@ -12,7 +12,7 @@ int main(int argc, char const *argv[]) {
   // ６で割った余りに、1を加えることで、
   // １〜６までの乱数が得られます。
   dice = rand() % 6 + 1;
-  printf("サイコロの目は、%d です。\n", dice);
+  printf("サイコロの目は %d です。\n", dice);
 
   // ２で割った余りが０なら、偶数、そうでないなら奇数です。
   if (dice % 2 == 0) {

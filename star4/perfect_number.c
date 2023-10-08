@@ -7,7 +7,8 @@
  **************************************************************************/
 #include <stdio.h>
 
-#define TRUE 1
+// 定数定義
+#define TRUE  1
 #define FALSE 0
 
 // 完全数判定関数
@@ -17,22 +18,21 @@ int main(int argc, char const *argv[]) {
   // 6  = 2 * 3
   // 28 = 2^2 * 7 である
   // 割り切れるかどうかを調べ、
-  // 割り切った合計が、もとの数と一致するか調べればよい。
-
-  int perfect_array[4] = {6, 28};
-  int perfect_index = 2;
+  // 割り切った数の合計が、もとの数と一致するか調べればよい。
+  int perfect_numbers[4] = {6, 28};
+  int n = 2; // 2つの完全数が発見されているので
 
   int candidate = 28 + 2; // 奇数の完全数は知られていないため、
                           // 28 の次の偶数を候補とする
 
+  // 最初の四つの完全数が発見されるまで繰り返す
   while (1) {
-    // 完全数かどうかの判定は、is_perfect関数に任せ、
-    // 完全数が発見されるまで、繰り返す
+    // 完全数の判定は、is_perfect関数で行う
     if (is_perfect(candidate)) {
-      // 完全数が発見されたら追加
-      perfect_array[perfect_index] = candidate;
-      perfect_index++;
-      if (perfect_index == 4) {
+      // 完全数が発見されたら追加する
+      perfect_numbers[n] = candidate;
+      n++;
+      if (n == 4) {
         break;
       } else {
         candidate += 2;
@@ -43,8 +43,8 @@ int main(int argc, char const *argv[]) {
   }
 
   // 結果表示
-  for (int i = 0; i < perfect_index; i++) {
-    printf(" %d 番目の完全数は、%5d です。\n", i + 1, perfect_array[i]);
+  for (int i = 0; i < n; i++) {
+    printf("%d 番目の完全数は %5d です。\n", i + 1, perfect_numbers[i]);
   }
 }
 

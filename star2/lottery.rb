@@ -1,50 +1,52 @@
+# 実行した時刻等によって、異なった乱数となるように乱数の種を播きます。
+# (いつも同じ乱数にしたければ、srand 123 の様に数を指定します)
+srand
 
 # 福引きの等級名
 # 配列の添字は0から始まるので、先頭に""を入れています。
 # prize_rank[1] が "一等賞"だと分かりやすいです。
-
-char *prize_rank[] = "", "一等賞", "二等賞", "三等賞", "残念賞"
+prize_rank = ["", "一等賞", "二等賞", "三等賞", "残念賞"]
 # 福引きの賞品
-char *prize_item[] = "", "世界一周の旅", "温泉一泊二日",
-"お好み焼き食べ放題", "ティッシュペーパー"
-# メッセージ
-char message[64]
+prize_item = ["", "世界一周の旅", "温泉一泊二日",
+                  "お好み焼き食べ放題", "ティッシュペーパー"]
 
 # 乱数はよく使うので、流用しています。
-lottery = random_number10 + 1 # 福引き 1-10の乱数が得られます。
+lottery = rand(1..10) # 福引き 1-10の乱数が得られます。
 
-rank # 何等賞か？
-if lottery == 1 
-rank = 1 # 一等賞
- elsif 2 <= lottery && lottery <= 3 
-rank = 2 # 二等賞
- elsif 4 <= lottery && lottery <= 6 
-rank = 3 # 三等賞
- else 
-rank = 4 # 残念賞
-
+if lottery == 1
+  rank = 1 # 一等賞
+elsif 2 <= lottery && lottery <= 3
+  rank = 2 # 二等賞
+elsif 4 <= lottery && lottery <= 6
+  rank = 3 # 三等賞
+else
+  rank = 4 # 残念賞
+end
 
 # 小さい順に切り取っているので、
 # elsif の下限は省略出来ます。
-if lottery == 1 
-rank = 1 # 一等賞
- elsif lottery <= 3 
-rank = 2 # 二等賞
- elsif lottery <= 6 
-rank = 3 # 三等賞
- else 
-rank = 4 # 残念賞
+if lottery == 1
+  rank = 1 # 一等賞
+elsif lottery <= 3
+  rank = 2 # 二等賞
+elsif lottery <= 6
+  rank = 3 # 三等賞
+else
+  rank = 4 # 残念賞
+end
 
-
-# ちなみに条件式を書けないので、switch case 文には出来ません。
+# case 文を使って次のようにも書けます。
+case lottery
+when 1
+  rank = 1 # 一等賞
+when 2 .. 3
+  rank = 2 # 二等賞
+when 4 .. 6
+  rank = 3 # 三等賞
+else
+  rank = 4 # 残念賞
+end
 
 # それぞれの等級に応じたメッセージを創っています。
-# 練習のために、文字列操作の関数を使っています。
-strcpymessage, "おめでとう！"# コピー関数
-strcpymessage, prize_rank[rank]# コピー関数
-strcatmessage, "："# 連結関数
-strcatmessage, prize_item[rank]# 連結関数
-strcatmessage, " が当たったよ。" # 連結関数
-puts "%s", message
-
-
+message = "おめでとう！ #{prize_rank[rank]}: #{prize_item[rank]} が当たったよ。"
+puts message

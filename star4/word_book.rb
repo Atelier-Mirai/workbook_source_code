@@ -1,37 +1,32 @@
-/**************************************************************************
- * 英単語帳アプリを創ってみましょう。
- * I -> わたし
- * love -> 愛する
- * you -> あなた
- * と答えられたら、満点です。
- * 10問出題して、英語力向上を目指しましょう。
- **************************************************************************/
+##########################################################################
+# 英単語帳アプリを創ってみましょう。
+# I -> わたし
+# love -> 愛する
+# you -> あなた
+# と答えられたら、満点です。
+# 10問出題して、英語力向上を目指しましょう。
+##########################################################################
 
+# 実行した時刻等によって、異なった乱数となるように乱数の種を播きます。
+# (いつも同じ乱数にしたければ、srand 123 の様に数を指定します)
+srand
 
+# 定数宣言
+CHOICES_SIZE   =  3 # 三択で出題する
+REGISTERD_WORD = 10 # 登録単語数
 
 # 出題用配列
-char *english_words[] = "", "I", "love","you",
- "C","language","lesson","happy",
- "hacker", "programming", "computer"
-char *japanese_words[] = "", "わたし", "愛する","あなた",
-"C","言語", "学習","幸せ",
-"技術者", "プログラミング", "コンピュータ"
-
-# 三択で出題する
-choices[CHOICES_SIZE + 1] # 0 は未使用とするため、+1
-candidate # 選択肢の候補
-registerd_word = 10 # 登録単語数
-question_number # 第何問目か？
-correct_answer# 正答
-your_answer # 入力された回答
-score # 得点
-flag
-i
+english_words  = ["", "I", "love","you",
+                  "C","language","lesson","happy",
+                  "hacker", "programming", "computer"]
+japanese_words = ["", "わたし", "愛する","あなた",
+                  "C","言語", "学習","幸せ",
+                  "技術者", "プログラミング", "コンピュータ"]
 
 # オープニング
 puts "****************************************************"
 puts "* "
-puts "* 英単語ゲームへようこそ"
+puts "*              英単語ゲームへようこそ"
 puts "* "
 puts "****************************************************"
 puts ""
@@ -40,78 +35,55 @@ puts ""
 
 # 10題出題する
 score = 0
-for question_number = 1 question_number <= 10 question_number++ 
-puts "【第 %d 問】", question_number
+(1..10).each do |question_number|
+  puts "【第 #{question_number} 問】"
 
-# 選択肢の初期化
-for i = 0 i <= CHOICES_SIZE i++ 
-choices[i] = 0
+  # 選択肢 choices[1], [2], [3] に単語番号(添字)をセット
+  # 範囲オブジェクト(1..10)に、to_a メソッドを呼び出すと、
+  # 配列[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]が得られます。
+  # shuffle メソッドは、その名の通り配列の要素をランダムにシャッフルします。
+  # [0..2]で、シャッフルされた配列の先頭要素三つを取得出来ます。
+  choices = (1..REGISTERD_WORD).to_a.shuffle[0..2]
 
+  # choice[0], [1], [2] の中から、いずれかを正解として設定する
+  # shuffle メソッドは、配列要素を一つからランダムに選んで返します。
+  correct = (0...CHOICES_SIZE).to_a.sample
 
-# choices[1], [2], [3] に出題番号をセット
-do 
-# 1から3の乱数を取得
-candidate = genrand_int32 % registerd_word + 1
-# 選択肢に登録済みか調べる。
-flag = FALSE
-for i = 1 i <= CHOICES_SIZE i++ 
-if candidate == choices[i] 
-flag = TRUE # すでに選ばれていた
-break
+  # correct を正解として設定したので、
+  # choices[correct] の単語を出題する
+  printf "%s\n", english_words[choices[correct]]
 
+  # 選択肢を提示する
+  # (choices[correct] の単語が必ず選択肢に含まれている)
+  (0...CHOICES_SIZE).each do |i|
+    printf "%d: %s ", i+1, japanese_words[choices[i]]
+  end
+  printf "\n"
 
-# 選択肢には未登録であったので、登録する
-if flag == FALSE 
-for i = 1 i <= CHOICES_SIZE i++ 
-if choices[i] == 0 
-# i番目の選択肢として登録する
-choices[i] = candidate
-break
+  # 1 ~ 3 までの入力を求める
+  answer = gets.chomp.to_i
+  loop do
+    break if answer.between?(1, CHOICES_SIZE) # 1 ~ 3 の範囲内にあるなら
+  end
 
-
-
-# choice[3]（最後の選択肢）に0以外の値がセットされるまで繰り返す
- while choices[CHOICES_SIZE] == 0
-
-# choice[1], [2], [3] の中から、いずれかを正解として設定する
-correct_answer = genrand_int32 % 3 + 1
-
-# 出題する
-puts "%s", english_words[choices[correct_answer]]
-
-# 選択肢を提示する
-for i = 1 i <= CHOICES_SIZE i++ 
-puts "%d: %s ", i, japanese_words[choices[i]]
-
-puts ""
-
-# 1-3 までの入力を求める
-do 
-scanf"%d", &your_answer
-while getchar != ''
- # キーバッファ読み飛ばす
- while your_answer <= 0 || your_answer > CHOICES_SIZE
-
-# 正解判定
-if your_answer == correct_answer 
-puts "正解です！"
-score++ # 得点加算
- else 
-puts "残念。正解は、%d: %s です。", correct_answer,
- japanese_words[choices[correct_answer]]
-
-
+  # 正解判定
+  if answer-1 == correct
+    printf "正解です！\n\n"
+    score += 1 # 得点加算
+  else
+    printf "残念。正解は、%d: %s です。\n\n",
+        correct+1, japanese_words[choices[correct]]
+  end
+end
 
 # 総合結果発表
 puts "****************************************************"
 puts "* "
-puts "* 結　果　発　表"
+puts "*                 結　果　発　表"
 puts "* "
-puts "* 10 問中 %d 問 正解", score
+puts "*               10 問中 #{score} 問 正解"
 puts "* "
-puts "*おめでとうございます！ "
+puts "*             おめでとうございます！ "
 puts "* "
 puts "****************************************************"
 puts ""
-
-

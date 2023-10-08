@@ -3,14 +3,14 @@
 
 int main(int argc, char const *argv[]) {
 
-  long population = 8000000000; // 世界人口
-                                // 約21億以上の数は、long型を使います。
-  double growth_rate = 0.01; // 人口増加率 1%
+  long   population  = 8000000000;  // 世界人口 80億人
+                                    // 約21億以上の数は、long型を使います。
+  double growth_rate = 0.01;        // 人口増加率 1%
 
+  // 来年の人口
   // int, double, long
   // それぞれの型が自動的に変換されていることに着目して下さい。
   long next_year_population = population * (1 + growth_rate);
-
   // long型の書式指定子は、%ld です。
   printf("来年の人口は %ld 人です。\n", next_year_population);
 

@@ -26,7 +26,7 @@ int main(int argc, char const *argv[]) {
   for (i = 0; i < 10; i++) {
     printf("array[%d]: %2d \n", i, array[i]);
   }
-  printf("一番小さい数は、%d です。\n", min);
+  printf("一番小さい数は %d です。\n", min);
 
   // 二番目に小さい数を求めます。
   // int array[] = { 3, 15, 22, 81, 41, 83, 72, 0, 50, 33 };
@@ -42,7 +42,8 @@ int main(int argc, char const *argv[]) {
   // int array[] = { 3, 15, 22, 81, 41, 83, 72, 50, 33, 33 };
   // という配列になります。
 
-  // それでは、0 が array の何番目の要素であったかを求めてみましょう。
+  // それでは、0 が array の何番目の要素であったか、
+  // 添字(index)を求めてみましょう。
   int index = 0; // 最小値 min が何番目の要素であるか
   for (i = 0; i < 10; i++) {
     if (array[i] == min) {

@@ -10,15 +10,16 @@
 #include "mt.h"
 #include <stdio.h>
 
-#define CHOICES_SIZE 3 // 三択で出題する
-#define TRUE 1
-#define FALSE 0
+#define CHOICES_SIZE    3 // 三択で出題する
+#define REGISTERD_WORD 10 // 登録単語数
+#define TRUE            1 // 真
+#define FALSE           0 // 偽
 
 int main(int argc, char const *argv[]) {
   // 出題用配列
-  char *english_words[] = {"",       "I",           "love",    "you",
-                           "C",      "language",    "lesson",  "happy",
-                           "hacker", "programming", "computer"};
+  char *english_words[]  = {"",       "I",           "love",    "you",
+                            "C",      "language",    "lesson",  "happy",
+                            "hacker", "programming", "computer"};
   char *japanese_words[] = {"",       "わたし",         "愛する",      "あなた",
                             "C",      "言語",           "学習",        "幸せ",
                             "技術者", "プログラミング", "コンピュータ"};
@@ -26,10 +27,9 @@ int main(int argc, char const *argv[]) {
   // 三択で出題する
   int choices[CHOICES_SIZE + 1]; // 0 は未使用とするため、+1
   int candidate;                 // 選択肢の候補
-  int registerd_word = 10;       // 登録単語数
   int question_number;           // 第何問目か？
-  int correct_answer;            // 正答
-  int your_answer;               // 入力された回答
+  int correct;                   // 正答
+  int answer;                    // 入力された回答
   int score;                     // 得点
   int flag;
   int i;
@@ -54,11 +54,11 @@ int main(int argc, char const *argv[]) {
       choices[i] = 0;
     }
 
-    // choices[1], [2], [3] に出題番号をセット
+    // choices[1], [2], [3] に単語番号(添字)をセット
     do {
-      // 1から3の乱数を取得
-      candidate = genrand_int32() % registerd_word + 1;
-      // 選択肢に登録済みか調べる。
+      // 1から英単語数(REGISTERD_WORD)までの乱数を取得
+      candidate = genrand_int32() % REGISTERD_WORD + 1;
+      // このcandidate(候補)が、choices(選択肢)に登録済みか調べる。
       int flag = FALSE;
       for (i = 1; i <= CHOICES_SIZE; i++) {
         if (candidate == choices[i]) {
@@ -80,31 +80,33 @@ int main(int argc, char const *argv[]) {
     } while (choices[CHOICES_SIZE] == 0);
 
     // choice[1], [2], [3] の中から、いずれかを正解として設定する
-    correct_answer = genrand_int32() % 3 + 1;
+    correct = genrand_int32() % 3 + 1;
 
-    // 出題する
-    printf("%s\n", english_words[choices[correct_answer]]);
+    // correct を正解として設定したので、
+    // choices[correct] の単語を出題する
+    printf("%s\n", english_words[choices[correct]]);
 
     // 選択肢を提示する
+    // (choices[correct] の単語が必ず選択肢に含まれている)
     for (i = 1; i <= CHOICES_SIZE; i++) {
       printf("%d: %s ", i, japanese_words[choices[i]]);
     }
     printf("\n");
 
-    // 1-3 までの入力を求める
+    // 1 ~ 3 までの入力を求める
     do {
-      scanf("%d", &your_answer);
+      scanf("%d", &answer);
       while (getchar() != '\n')
         ; // キーバッファ読み飛ばす
-    } while (your_answer <= 0 || your_answer > CHOICES_SIZE);
+    } while (answer <= 0 || answer > CHOICES_SIZE);
 
     // 正解判定
-    if (your_answer == correct_answer) {
+    if (answer == correct) {
       printf("正解です！\n\n");
       score++; // 得点加算
     } else {
-      printf("残念。正解は、%d: %s です。\n\n", correct_answer,
-             japanese_words[choices[correct_answer]]);
+      printf("残念。正解は、%d: %s です。\n\n", correct,
+             japanese_words[choices[correct]]);
     }
   }
 
@@ -115,7 +117,7 @@ int main(int argc, char const *argv[]) {
   printf("*                                                   \n");
   printf("*             10 問中 %d 問 正解\n", score);
   printf("*                                                   \n");
-  printf("*            おめでとうございます！                 \n");
+  printf("*             おめでとうございます！                \n");
   printf("*                                                   \n");
   printf("****************************************************\n");
   printf("\n");

@@ -3,9 +3,9 @@
 
 int main(int argc, char const *argv[]) {
   int n;
-  long power = 1;
+  long power = 1; // 冪乗（べきじょう）は、英語でpowerと言います。
 
-  // ２の冪乗(べきじょう)を求めます。
+  // ２の冪乗を求めます。
   for (n = 1; n <= 20; n++) {
     power *= 2;
     printf("2 の %2d 乗は %8ld です。\n", n, power);

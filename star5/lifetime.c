@@ -6,22 +6,23 @@
  * 生後30000日目を迎えるのは、何年何月何日でしょうか？
  **************************************************************************/
 
-#include <math.h>
+#include <math.h>   // floor関数のために
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <time.h> // 日付時刻の操作用関数
+#include <time.h>   // 日付時刻の操作用関数
 
-// 年月日からユリウス通日を求める関数
-int julian_day_number(int year, int month, int day);
-// ユリウス通日から年月日を返す関数
-void inverse_julian_day_number(int jdn, int *year, int *month, int *day);
+// グレゴリオ暦から修正ユリウス日を返す為の関数
+int gregorian_to_mjd(int year, int month, int date);
+
+// 修正ユリウス日(mjd)からグレゴリオ暦(y, m, d)を返す為の関数
+void mjd_to_gregorian(int mjd, int *y, int *m, int *d);
 
 int main(int argc, char const *argv[]) {
   // コマンドラインからの引数がなければ、使い方表示
   if (argc == 1) {
     printf("【使い方】\n");
-    printf("今日まで何日来たかを表示します。\n");
+    printf("今日まで何日生きたかを表示します。\n");
     printf("1980年1月1日生まれであれば、\n");
     printf("%s 19800101\n", argv[0]);
     printf("昭和20年8月10日生まれであれば、\n");
@@ -32,7 +33,7 @@ int main(int argc, char const *argv[]) {
 
   int birthday; // 生年月日
   char *endptr; // 数値に変換出来なかった文字
-  int b_year;   // 誕生日の西暦年
+  int b_year;   // 誕生日のグレゴリオ暦年
   int b_month;  // 誕生日の月
   int b_day;    // 誕生日の日
 
@@ -47,7 +48,7 @@ int main(int argc, char const *argv[]) {
 
   // 生年月日に分離する
   // 年
-  // 元号入力なら、西暦へ変換
+  // 元号入力なら、グレゴリオ暦へ変換
   if (birthday < 1e7) {
     int ge = birthday / 10000; // 上3桁 元号符号+元号年
     switch (ge / 100) {
@@ -63,16 +64,19 @@ int main(int argc, char const *argv[]) {
     case 4:
       b_year = ge % 100 + 1988;
       break;
+    case 5:
+      b_year = ge % 100 + 2018;
+      break;
     }
   } else {
-    b_year = birthday / 10000; // 上4桁は西暦年
+    b_year = birthday / 10000; // 上4桁はグレゴリオ暦年
   }
   // 月
   b_month = birthday / 100; // 下二桁を切り捨てて
   b_month = b_month % 100;  // 残った数の下2桁
 
   // 日
-  b_day = birthday % 100; // 下2桁は日
+  b_day   = birthday % 100; // 下2桁は日
 
   // http://simd.jugem.jp/?eid=149 より引用
   // 今日の日付を取得する
@@ -92,9 +96,9 @@ int main(int argc, char const *argv[]) {
   // printf( "%5d : [経過日数]\n", ltm->tm_yday );
   // printf( "%5d : [夏時間の有無]\n", ltm->tm_isdst );
 
-  int t_year = ltm->tm_year + 1900; // 今日の西暦年
-  int t_month = ltm->tm_mon + 1;    // 今日の月
-  int t_day = ltm->tm_mday;         // 今日の日
+  int t_year  = ltm->tm_year + 1900; // 今日のグレゴリオ暦年
+  int t_month = ltm->tm_mon + 1;     // 今日の月
+  int t_day   = ltm->tm_mday;        // 今日の日
 
   // strftime関数を用いて文字列にすることも可能
   // char str_time[100];
@@ -111,99 +115,69 @@ int main(int argc, char const *argv[]) {
   // ユリウス通日（つうじつ）として知られており、
   // 紀元前4713年1月1日 を第一日として、
   // 天文学などの分野で用いられています。
+  // ユリウス通日は桁数が大きくなるので、
+  // ここから240万日を引いた修正ユリウス日も用いられます。
   // https://ja.wikipedia.org/wiki/ユリウス通日
-  // に公式がありますので、プログラミングしましたが、
-  // http://ufcpp.net/study/algorithm/o_days.html
-  // にも説明があります。
+  // に公式がありますので、プログラミングしました。
+  // https://ufcpp.net/study/algorithm/o_days.html
+  // にも分かりやすい説明がありますので、ご一読ください。
 
   printf("今日は　　　 %4d 年 %2d 月 %2d 日です。\n", t_year, t_month, t_day);
   printf("誕生日は　　 %4d 年 %2d 月 %2d 日です。\n", b_year, b_month, b_day);
 
-  // 今日のユリウス通日
-  int today_jdn = julian_day_number(t_year, t_month, t_day);
-  // printf("今日の ユリウス通日 %d\n", today_jdn);
-  int birthday_jdn = julian_day_number(b_year, b_month, b_day);
-  // printf("誕生日の ユリウス通日 %d\n", birthday_jdn);
+  // 今日の修正ユリウス日
+  int today_mjd    = gregorian_to_mjd(t_year, t_month, t_day);
+  // printf("%5d\n", today_mjd);
+  int birthday_mjd = gregorian_to_mjd(b_year, b_month, b_day);
+  // printf("%5d\n", birthday_mjd);
 
   // 結果表示
-  printf("今日は生後　%5d 日 です。\n", today_jdn - birthday_jdn);
+  printf("今日は生まれて %5d 日目 です。\n", today_mjd - birthday_mjd + 1);
 
   // 生まれてから30000日後がいつかを求めます。
-  int life_30000_jdn = birthday_jdn + 30000;
+  int life_30000_mjd = birthday_mjd + 30000;
   int l_year, l_month, l_day;
   // l_year, l_month, l_day に値がセットされるよう、アドレスを渡します。
-  inverse_julian_day_number(life_30000_jdn, &l_year, &l_month, &l_day);
-  printf("生後三万日は %4d 年 %2d 月 %2d 日 です。\n", l_year, l_month, l_day);
+  mjd_to_gregorian(life_30000_mjd, &l_year, &l_month, &l_day);
+  printf("生後三万日は %4d 年 %2d 月 %2d 日です。\n", l_year, l_month, l_day);
 
   return 0;
 }
 
-// 年月日からユリウス通日を求める関数
-int julian_day_number(int year, int month, int day) {
-  /*
-    https://ja.wikipedia.org/wiki/ユリウス通日
-    // 2月のユリウス通日が不正
+// グレゴリオ暦から修正ユリウス日を返す為の関数
+int gregorian_to_mjd(int year, int month, int date) {
+  // 1月や2月は前年の13月,14月として扱う
+  if (month == 1 || month == 2) {
+    month += 12;
+    year  -= 1;
+  }
 
-    int y, m, d;
-    int n;
-    int mjd;
-    int jdn;
+  // 公式に従い、修正ユリウス日mjdを求める
+  int mjd = floor(365.25 * year)
+          + floor(year / 400)
+          - floor(year / 100)
+          + floor(30.59 * (month - 2))
+          + date
+          - 678912;
 
-    y = year + (month - 3) / 12;
-    m = (month - 3) % 12;
-    d = day - 1;
-    n = d + (153*m+2)/5 + 365*y + y/4 - y/100 + y/400;
-      mjd = n - 678881;
-    jdn = mjd + 2400001;
-  */
-
-  int a = (14 - month) / 12;
-  int y = year + 4800 - a;
-  int m = month + 12 * a - 3;
-
-  int jdn =
-      day + (153 * m + 2) / 5 + 365 * y + y / 4 - y / 100 + y / 400 - 32045;
-
-  return jdn;
+  // 算出結果を返す
+  return mjd;
 }
 
-// 年月日からユリウス通日を返す関数
-void inverse_julian_day_number(int jdn, int *year, int *month, int *day) {
+// 修正ユリウス日(mjd)からグレゴリオ暦(y, m, d)を返す為の関数
+void mjd_to_gregorian(int mjd, int *y, int *m, int *d) {
   // 複数の値を返すときは、ポインタで返します
 
-  /*
-    int n = jdn - 2400001 + 678881;
-    printf("inv_jdn: n: %d\n", n);
-    int a = 4*n + 3 + 4*floor(3.0/4.0 * (floor(4*(n+1)/146097) + 1));
-    int b = 5 * floor((a%1461)/4) + 2;
-
-    int y = a / 1461;
-    int m = b / 153;
-    int d = (b % 153) / 5;
-
-    // y = year + (month - 3) / 12;
-    // m = (month - 3) % 12;
-    // d = day - 1;
-
-    // であるから、
-    day = d + 1;
-    month = (m + 3);
-    if (month > 12) {
-      month = month - 1;
-    }
-  */
-
-  // https://en.wikipedia.org/wiki/Julian_day
-  int f = jdn + 1401 + (((4 * jdn + 274277) / 146097) * 3) / 4 - 38;
-
-  int e = 4 * f + 3;
-  int g = (e % 1461) / 4;
-  int h = 5 * g + 2;
-  int D = (h % 153) / 5 + 1;
-  int M = (h / 153 + 2) % 12 + 1;
-  int Y = (e / 1461) - 4716 + (12 + 2 - M) / 12;
-
-  *year = Y;
-  *month = M;
-  *day = D;
+  int n = mjd + 678881;
+  // floor関数はdouble型を返すので、整数型(int)へキャスト
+  int a = 4*n + 3 + 4*(int)floor((3.0/4.0) * (4*(n+1)/146097 + 1));
+  int b = 5 * ((a % 1461) / 4) + 2;
+  *y = a / 1461;
+  *m = b / 153 + 3;
+  *d = (b % 153) / 5 + 1;
+  // 1月や2月は前年の13月,14月として扱う
+  if (*m == 13 || *m == 14) {
+    *m -= 12;
+    *y += 1;
+  }
 }

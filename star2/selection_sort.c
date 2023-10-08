@@ -8,32 +8,35 @@ int main(int argc, char const *argv[]) {
   int min; // 最小値を格納する変数
   int i;
 
-  // 最小値を求める処理
+  // (a) 最小値を求める処理
   min = INT_MAX;
-  for (i = 0; i < 10; i++) { // (a)
+  for (i = 0; i < 10; i++) {
     if (min > array[i]) {
       min = array[i];
     }
   }
 
-  // それでは、0 が array の何番目の要素であったかを求めてみましょう。
+  // (b) min は 配列の最小値 0 となっています。
+  // 最小値0 が array の何番目の要素であったかを求めてみましょう。
   int index = 0;             // 最小値 min が何番目の要素であるか
   for (i = 0; i < 10; i++) { // (b)
     if (array[i] == min) {
       index = i;
+      break;
     }
   }
 
   printf("(a)(b)それぞれ行った場合の結果表示\n");
   for (i = 0; i < 10; i++) {
-    printf("array[%d]: %2d \n", i, array[i]);
+    printf("array[%d]: %2d\n", i, array[i]);
   }
   printf("min: %d index: %d\n", min, index);
 
   // ここで、(a) と (b) 同時に出来るのではと思えて来ます。
   // 一緒に書くと、次のようになります。
   // 最小値を求めると同時に、最小値 min が何番目の要素であるか求める
-  min = INT_MAX;
+  min    = INT_MAX;
+  index  = 0;
   for (i = 0; i < 10; i++) {
     if (min > array[i]) {
       min = array[i]; // (a)
@@ -99,10 +102,11 @@ int main(int argc, char const *argv[]) {
 
   printf("\n");
   printf("選択ソートの他に、有名な並び替え方法としては、\n");
+  printf("シェルソート\n");
   printf("クイックソート\n");
-  printf("バブルソート\n");
   printf("マージソート\n");
-  printf("が、あるので、学習してみて下さい。\n");
+  printf("などがあります。\n");
+  printf("どうぞ学習なさって下さい。\n");
 
   return 0;
 }

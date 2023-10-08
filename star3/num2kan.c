@@ -5,7 +5,7 @@
  *
  * 正規表現については、
  * https://ja.wikipedia.org/wiki/正規表現
- * http://rubular.com 参照
+ * https://rubular.com 参照
  **************************************************************************/
 #include <regex.h> // 正規表現 regcomp, regex
 #include <stdio.h>
@@ -28,22 +28,24 @@ char *num2kan(char *str);
 
 int main(int argc, char const *argv[]) {
 
-  // コマンドラインからの引数がなければ、使い方表示
+  // コマンドラインからの引数がなければ、使い方を表示
   if (argc == 1) {
     printf("【使い方】\n");
     printf(
         "算用数字を漢数字にするプログラムです。無量大数まで変換出来ます。\n");
-    printf("%s 302\n", argv[0]);
+    printf("%s 1234567890\n", argv[0]);
     printf("の様に入力して下さい。\n");
-    exit(1);
+    printf("十二億三千四百五十六万七千八百九十\n");
+    printf("を表示します。\n")
+    exit(0);
   }
 
   // コマンドライン引数チェック
   // '0'-'9' 以外の文字が含まれていたら、エラー表示し、終了する。
   // （正規表現を用いたが、一桁ずつ読み込み、'0'-9 か、チェックしても良い)
-
   // 正規表現のC言語でのコーディングについては、
-  // http://atomic.jpn.ph/prog/lang/regex.html 参照
+  // C 言語での正規表現 https://www.delftstack.com/ja/howto/c/c-regex/
+  // が参考になります。
 
   char *reg = "^[0-9]+$"; // 全て数字であるか判定するための正規表現
   regex_t regst;
@@ -65,11 +67,6 @@ int main(int argc, char const *argv[]) {
     exit(1);
   }
 
-  // 漢数字への変換処理
-  // 4桁ごとに漢数字に変換する
-  // 例)    12    3456              7890
-  //   => 十二 億 三千四百五十六 万 七千八百九拾
-
   // 変数宣言
   int digit_length; // 何桁の数字か
   int i, u;
@@ -82,24 +79,24 @@ int main(int argc, char const *argv[]) {
   char work[7 * 3 + 1];
   strcpy(work, "");
 
-  // 4桁ごとに区切って渡せるよう、先頭に0を付与する
+  // 漢数字への変換処理
+  // 4桁ごとに区切って変換できるよう、先頭に0を付与する
   // 12 3456 7890 => 0012 3456 7890
-  digit_length = strlen(argv[1]);           // 何桁の数であるか？
-  int giving_zero = 4 - (digit_length % 4); // 先頭に付与すべき0の数
-  if (giving_zero == 4) {
-    giving_zero = 0;
-  };
+  digit_length = strlen(argv[1]);     // 何桁の数であるか？
+  int giving_zero = 4 - digit_length % 4; // 先頭に付与すべき0の数
+  giving_zero %= 4;                       //  4 なら 0 にする
   for (i = 0; i < giving_zero; i++) {
     strcat(string_number, "0");
   }
   strcat(string_number, argv[1]);
-
   // 何桁の数字か
   digit_length = strlen(string_number);
 
   // ４桁毎に漢数字に変換
-  // 4桁までなら unit2 ""  // 8桁までなら unit2 "万"  // 12桁までなら unit2 "億"
-  // を付与する
+  //  4桁までなら unit2 ""
+  //  8桁までなら unit2 "万"
+  // 12桁までなら unit2 "億"
+  // 等を付与する
   int unit2_index = (digit_length / 4) - 1;
   for (u = 0; u < digit_length / 4; u++, unit2_index--) {
     // string_number から 各ユニット毎に、4文字ずつ work にコピー
@@ -111,7 +108,7 @@ int main(int argc, char const *argv[]) {
 
     // 4桁毎に漢数字に変換、結果を連結する
     strcat(chinese_numeral, num2kan(work));
-    // ・・・ "兆", "億", "万", "" の付与
+    // "億", "万", "" の付与
     strcat(chinese_numeral, unit2[unit2_index]);
   }
 
@@ -131,27 +128,27 @@ char *num2kan(char *str) {
   // 変数宣言
   int i;
   char work[7 * 3 + 1]; // 三千四百五十六 7文字*3バイト+終端文字1バイト
-  strcpy(work, ""); // 初期化
+  strcpy(work, "");     // 初期化
 
   // 一つずつ漢数字に変換する
   for (i = 0; i < 4; i++) {
     switch (str[i]) {
     case '0':
-      break; // 何もせず、次の桁へ進む
+      break;  // 何もせず、次の桁へ進む
     case '1':
       // 一の位のみ "一"と書く
       if (i == 3) {
-        strcat(work, digit[str[i] - '0']); // str[i]-'0' 文字0から数値0へ変換
+        strcat(work, digit[str[i] - '0']);  // str[i]-'0' 文字0から数値0へ変換
       }
-      strcat(work, unit1[i]); // "千", "百", "十", "" のいずれか
+      strcat(work, unit1[i]);               // "千", "百", "十", "" のいずれか
       break;
     default:
-      strcat(work, digit[str[i] - '0']); // "一" 〜 "九"
-      strcat(work, unit1[i]); // "千", "百", "十", "" のいずれか
+      strcat(work, digit[str[i] - '0']);    // "一" 〜 "九"
+      strcat(work, unit1[i]);               // "千", "百", "十", "" のいずれか
       break;
     }
   }
 
-  // 作業結果を戻す
+  // 変換結果を返す
   return strcpy(str, work);
 }

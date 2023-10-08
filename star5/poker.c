@@ -1,121 +1,166 @@
-/*======================================================*/
-/*                                                      */
-/* ポーカー                                             */
-/*                                                      */
-/* https://ja.wikipedia.org/wiki/ポーカー・ハンドの一覧 */
-/* https://simple.wikipedia.org/wiki/Poker#Hands        */
-/*======================================================*/
+/**************************************************************************/
+//
+// ポーカー
+//
+// https://ja.wikipedia.org/wiki/ポーカー
+// https://ja.wikipedia.org/wiki/ポーカー・ハンドの一覧
+//
+// 文字コードとビット演算の学習を兼ねて、次のようにカードを表現します。
+//
+// ASCIIコード表(抜粋)
+//      |123456789ABCD
+// -----+-------------
+// 0x40 |ABCDEFGHIJKLM
+// 0x50 |QRSTUVWXYZ[\]
+// 0x60 |abcdefghijklm
+// 0x70 |qrstuvwxyz{|}
+//
+// 文字'A'の文字コードは0x41です。
+// 上位4bitでカードの種類(suits) を、
+// 下位4bitでカードの数字(rank)を、表現することとします。
+// するとトランプカード一式は次のように表現できます。
+//
+// カードの表現
+//          |A234567890JQK
+// ---------+-------------
+// ♣️Club   |ABCDEFGHIJKLM
+// ♦︎Diamond|QRSTUVWXYZ[\]
+// ♡Heart  |abcdefghijklm
+// ♠️Spade  |qrstuvwxyz{|}
+//
+// 例）Cards と書くと
+// Cは Club(三つ葉)の3
+// aは Heart(ハート)のA
+// rは Spade(スペード)の2
+// dは Heart(ハート)の4
+// sは Spade(スペード)の3 を表すので
+// ワンペアとなります。
+//
+// プレイヤーの手札は文字型の配列で表現します。
+// hands[1]:EJKLM
+// hands[2]:ejklm
+//
+// また、役の判定を行いやすくするために、次のような管理配列を用意します。
+// cards[6][17]
+//          | A 2 3 4 5 6 7 8 9 0 J Q K A | P1 P2
+// ---------+-----------------------------+------
+// Clubs    | 0 0 0 0 1 0 0 0 0 1 1 1 1 0 |  5  0
+// Diamonds | 0 0 0 0 0 0 0 0 0 0 0 0 0 0 |  0  0
+// Hearts   | 0 0 0 0 2 0 0 0 0 2 2 2 2 0 |  0  5
+// Spades   | 0 0 0 0 0 0 0 0 0 0 0 0 0 0 |  0  0
+// ---------+-----------------------------+------
+// Player 1 | 0 0 0 0 1 0 0 0 0 1 1 1 1 0 |  0  0
+// Player 2 | 0 0 0 0 1 0 0 0 0 1 1 1 1 0 |  0  0
+//
+// この場合、プレーヤー1は三つ葉を5枚、プレーヤー2はハートを5枚持っています。
+// ですので、どちらの役もフラッシュです。
+/**************************************************************************/
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
 
-#define BUFFER_SIZE 255 // 文字列用のバッファサイズ
-
-// printfを簡単にするためのマクロ定義
-#define prd(dt) printf(#dt ":%d\n", dt)
-#define prs(dt) printf(#dt ":%s\n", dt)
-#define prx(dt) printf(#dt ":%x\n", dt)
+// 文字列用のバッファサイズ
+#define BUFFER_SIZE 255
+// デバッグを簡単にするためのマクロ定義
+#define p(var) printf(#var ":%s\n", var)
 
 // カードの種類
-typedef enum { CLUBS = 4, DIAMONDS, HEARTS, SPADES } suits;
 typedef enum {
-  NO_PAIR,         // 役無し
-  ONE_PAIR,        // ワンペア
-  TWO_PAIR,        // ツーペア
-  THREE_OF_A_KIND, // スリーカード
-  STRAIGHT,        // ストレート
-  FLUSH,           // フラッシュ
-  FULL_HOUSE,      // フルハウス
-  FOUR_OF_A_KIND,  // フォーカード
-  STRAIGHT_FLUSH,  // ストレートフラッシュ
-                   // HANDS_COUNT,      //
+  CLUBS = 4,
+  DIAMONDS,
+  HEARTS,
+  SPADES
+} suits;
+
+// 役の種類
+typedef enum {
+  NO_PAIR,         // 0 ぶた
+  ONE_PAIR,        // 1 ワンペア
+  TWO_PAIR,        // 2 ツーペア
+  THREE_OF_A_KIND, // 3 スリーカード
+  STRAIGHT,        // 4 ストレート
+  FLUSH,           // 5 フラッシュ
+  FULL_HOUSE,      // 6 フルハウス
+  FOUR_OF_A_KIND,  // 7 フォーカード
+  STRAIGHT_FLUSH,  // 8 ストレートフラッシュ
+  TOTAL_SCORE,     // 9 役判定後の合計得点
 } hands_type;
 
+// 役の名称
+const char* HANDS_NAME[9] = {
+  "ぶた",
+  "ワンペア",
+  "ツーペア",
+  "スリーカード",
+  "ストレート",
+  "フラッシュ",
+  "フルハウス",
+  "フォーカード",
+  "ストレートフラッシュ",
+};
+
 // プロトタイプ宣言
-void init_card();
-void init_player_hands(char player_hands[3][6]);
-void init_score();
+// 初期化
+void init_cards();
+void init_hands();
+void init_scores();
 
-void disp_hands();
-void disp_score();
-void disp_score();
+// 表示用
+void disp_cards();
+void disp_scores();
+void draw_ascii_art(char mycard);
 
-void disp_card(char mycard);
-
-int set_card(char mycard, int player);
-void calc_card();
+// 処理用
+int  set_card(char mycard, int player);
+void calc_cards();
 char get_card();
-void poker_hands(int player);
-int my_random(int n);
+void calc_hands();
+int  my_random(int n);
 void pause();
 void usage(char const *argv[]);
 
+// 役判定用
 int is_no_pair(int player);
-int is_one_pair(int player, int seach);
+int is_one_pair(int player);
 int is_two_pair(int player);
 int is_three_of_a_kind(int player);
 int is_straight(int player);
 int is_flush(int player);
-int is_full_house(int player);
 int is_four_of_a_kind(int player);
-int is_suit(int player, int search);
-
-// 文字コードとビット演算の学習を兼ねて、
-// 以下のようにカードを表現する
-/***************************************************
- *   A234567890JQK
- * C ABCDEFGHIJKLM
- * D QRSTUVWXYZ[\]
- * H abcdefghijklm
- * S qrstuvwxyz{|}
- *
- * 例）ABCTd と書くと
- * C(クローバー)のA,2,3,
- * D(ダイヤ)の4、
- * H(ハート)の4でワンペア
- ***************************************************/
-
-// player_hands[1]:EJKLM
-// player_hands[2]:ejklm
-// cards[6][17]
-//          | A 2 3 4 5 6 7 8 9 0 J Q K A |  1  2
-// ---------+-----------------------------+------
-// Clubs    | 0 0 0 0 1 0 0 0 0 1 1 1 1 0 | 13  0
-// Diamonds | 0 0 0 0 0 0 0 0 0 0 0 0 0 0 |  0  0
-// Hearts   | 0 0 0 0 2 0 0 0 0 2 2 2 2 0 |  0 13
-// Spades   | 0 0 0 0 0 0 0 0 0 0 0 0 0 0 |  0  0
-// ---------+-----------------------------+------
-// Player 1 | 0 0 0 0 1 0 0 0 0 1 1 1 1 0 |  0  0
-// Player 2 | 0 0 0 0 1 0 0 0 0 1 1 1 1 0 |  0  0
-// プレーヤー1 の役は フラッシュです
-// プレーヤー2 の役は フラッシュです
+int get_suit(int player, int rank);
 
 // グローバル変数
-char cards[6][17]; // 1-K + A で14種類 player1/2の合計用に2ます追加
-                   // 10,J,Q,K,A のストレート判定をしやすくするため、
-                   // K の次に Aを設けている
-int score[3][10][3]; // 役の強弱を判定するために用いる score[0] 未使用
+char hands[2+1][5+1];     // プレーヤーの手元にある5枚のカードを保持する配列
+                          // 添字の0は未使用
+char cards[4+2][14+2+1];  // カード管理用配列
+                          // 10,J,Q,K,A のストレート判定の為
+                          // K の次にも Aを設けることで、14要素
+                          // Player1, 2の合計用に 2要素追加し
+                          // 添字0は未使用の為、17要素とする
+int scores[2+1][9+1][2+1];// 役を点数に変換、強弱を判定するために用いる配列
+                          // 添字の0は未使用
 
+/*---------------------------------------------------------------------
+// メイン関数
+---------------------------------------------------------------------*/
 int main(int argc, char const *argv[]) {
-  int i;
-  char ss[BUFFER_SIZE + 1]; // ファイルから一行読み込むための作業用
-  FILE *fp;                 // ファイルポインタ
-  int player;  // １ならプレーヤー１、２ならプレーヤー２
-  char mycard; // 一枚引いたカード
-  char player_hands[2 + 1][5 + 1]; // プレーヤーの手元にある５枚のカード
-                                   // 添字の0は未使用
+  int  n;                    // n枚目の手札
+  char str[BUFFER_SIZE + 1]; // ファイルから一行読み込むための作業用
+  FILE *fp;                  // ファイルポインタ
+  int  player;               // 1ならプレーヤー1、2ならプレーヤー2を示す
+  char mycard;               // 一枚場から引いたカード
 
   // 初期化処理
-  init_card();
-  init_player_hands(player_hands);
-  init_score();
+  init_cards();
+  init_hands();
+  init_scores();
 
-  // コマンドライン引数なしなら、使い方表示して終了
+  // コマンドライン引数無しなら、使い方表示して終了
   if (argc < 2) {
     usage(argv);
-    exit(1);
+    exit(0);
   }
 
   // -f ファイルからの読み取りオプションなら
@@ -129,15 +174,16 @@ int main(int argc, char const *argv[]) {
     player = 1;
     while (1) {
       // ファイルから手を読み込む
-      fgets(ss, BUFFER_SIZE, fp);
-      if (strchr(ss, '*') == NULL && strchr(ss, '/') == NULL) {
-        // コメント行でなければ、読み取った手をセットする
-        strcpy(player_hands[player], ss);
-        player_hands[player][5] = '\0';
-        if (player == 2) {
-          break;
-        } else {
+      fgets(str, BUFFER_SIZE, fp);
+      // コメント行('*'や'/'を含む行)でなければ、
+      if (strchr(str, '*') == NULL && strchr(str, '/') == NULL) {
+        // 読み取った手をセットする
+        strcpy(hands[player], str);
+        hands[player][5] = '\0';
+        if (player == 1) {
           player++;
+        } else {
+          break;
         }
       }
     }
@@ -145,85 +191,56 @@ int main(int argc, char const *argv[]) {
 
     // 各プレーヤーが手にしたカード情報を、カード管理配列へ書き出す
     for (player = 1; player <= 2; player++) {
-      for (i = 0; i < 5; i++) {
-        mycard = player_hands[player][i];
+      // 0枚目から4枚目までのカードを順にセットする
+      for (n = 0; n < 5; n++) {
+        mycard = hands[player][n];
         // ファイル入力時は、同じカードは所有していないはずなので、
         // エラーチェックはしていない
         set_card(mycard, player);
       }
     }
 
-    // -m 交互入力オプションなら
+  // -m 交互入力オプションなら
   } else {
     for (player = 1; player <= 2; player++) {
-      for (i = 0; i < 5; i++) {
+      // 0枚目から4枚目までのカードを場から順に引く
+      for (n = 0; n < 5; n++) {
         do {
-          mycard = get_card(); // ランダムにカードを引く
-          // prx(mycard);       // 引いたカードを表示(debug)
-          disp_card(mycard); // 引いたカードを表示
-          pause();
-          player_hands[player][i] = mycard;
-        } while (set_card(mycard, player) !=
-                 0); // 既に引いたカードなら、引き直す
+          mycard = get_card();        // ランダムにカードを引く
+          draw_ascii_art(mycard);     // 引いたカードをアスキーアートで表示
+          pause();                    // 一時停止
+          hands[player][n] = mycard;  // 手札配列にセット
+        } while (set_card(mycard, player) != 0); // 既出のカードなら引き直す
       }
     }
   }
 
-  // playerの手元にあるカードを表示
-  prs(player_hands[1]);
-  prs(player_hands[2]);
+  // 各playerの手元にあるカードを表示
+  p(hands[1]);
+  p(hands[2]);
 
   // 得点計算
-  calc_card();
+  calc_cards();
 
   // 役を計算
-  poker_hands(1); // player1 の役を計算
-  poker_hands(2); // player2 の役を計算
+  calc_hands();
 
-  // カードの表示
-  disp_hands();
+  // カード管理配列の表示
+  disp_cards();
 
   // 得点表示
-  disp_score();
+  disp_scores();
 
   // 役を表示
   for (player = 1; player <= 2; player++) {
-    printf("プレーヤー%d の役は ", player);
-    switch (score[player][9][0] / 1000) {
-    case 8:
-      printf("ストレートフラッシュです\n");
-      break;
-    case 7:
-      printf("フォーカードです\n");
-      break;
-    case 6:
-      printf("フルハウスです\n");
-      break;
-    case 5:
-      printf("フラッシュです\n");
-      break;
-    case 4:
-      printf("ストレートです\n");
-      break;
-    case 3:
-      printf("スリーカードです\n");
-      break;
-    case 2:
-      printf("ツーペアです\n");
-      break;
-    case 1:
-      printf("ワンペアです\n");
-      break;
-    case 0:
-      printf("ぶたです\n");
-      break;
-    }
+    int h = scores[player][TOTAL_SCORE][0] / 1000;
+    printf("プレーヤー%d の役は %s です\n", player, HANDS_NAME[h]);
   }
 
   // 勝敗表示
-  if (score[1][9][0] > score[2][9][0]) {
+  if (scores[1][TOTAL_SCORE][0] > scores[2][TOTAL_SCORE][0]) {
     printf("プレーヤー1の勝ちです\n");
-  } else if (score[1][9][0] < score[2][9][0]) {
+  } else if (scores[1][TOTAL_SCORE][0] < scores[2][TOTAL_SCORE][0]) {
     printf("プレーヤー2の勝ちです\n");
   } else {
     printf("引き分けです\n");
@@ -231,134 +248,128 @@ int main(int argc, char const *argv[]) {
   return 0;
 }
 
+/*---------------------------------------------------------------------
 // カード配列の初期化
-void init_card() {
-  int i, j;
-  for (j = 0; j < 6; j++) {
-    for (i = 0; i < 17; i++) {
-      cards[j][i] = 0;
+---------------------------------------------------------------------*/
+void init_cards() {
+  int rank, suit;
+  for (suit = 0; suit < 6; suit++) {
+    for (rank = 0; rank < 17; rank++) {
+      cards[suit][rank] = 0;
     }
   }
 }
 
+/*---------------------------------------------------------------------
 // 得点配列の初期化
-void init_score() {
-  int i, j, player;
+---------------------------------------------------------------------*/
+void init_scores() {
+  int hand, attr, player;
   for (player = 0; player <= 2; player++) {
-    for (i = 0; i < 10; i++) {
-      for (j = 0; j < 3; j++) {
-        score[player][i][j] = 0;
+    for (hand = NO_PAIR; hand <= TOTAL_SCORE; hand++) {
+      for (attr = 0; attr < 3; attr++) {
+        scores[player][hand][attr] = 0;
       }
     }
   }
 }
 
+/*---------------------------------------------------------------------
 // プレーヤーの手にしているカードの初期化
-void init_player_hands(char player_hands[3][6]) {
-  int i, j;
-  for (j = 0; j < 3; j++) {
-    for (i = 0; i < 6; i++) {
-      player_hands[j][i] = 0;
+---------------------------------------------------------------------*/
+void init_hands() {
+  int player, n;
+  for (player = 0; player <= 2; player++) {
+    for (n = 0; n <= 5; n++) {
+      hands[player][n] = 0;
     }
   }
 }
 
+/*---------------------------------------------------------------------
 // カードの表示
-void disp_hands() {
-  int i, j;
+---------------------------------------------------------------------*/
+void disp_cards() {
+  int suit, rank;
   printf("\n");
-  printf("         | A 2 3 4 5 6 7 8 9 0 J Q K A |  1  2 \n");
+  printf("         | A 2 3 4 5 6 7 8 9 0 J Q K A | P1 P2\n");
   printf("---------+-----------------------------+------\n");
-  for (j = 0; j < 6; j++) {
-    switch (j) {
+  for (suit = 0; suit < 6; suit++) {
+    switch (suit) {
     case 0:
-      printf("Clubs    | ");
-      break;
+      printf("Clubs    | ");      break;
     case 1:
-      printf("Diamonds | ");
-      break;
+      printf("Diamonds | ");      break;
     case 2:
-      printf("Hearts   | ");
-      break;
+      printf("Hearts   | ");      break;
     case 3:
-      printf("Spades   | ");
-      break;
+      printf("Spades   | ");      break;
     case 4:
-      printf("Player 1 | ");
-      break;
+      printf("Player 1 | ");      break;
     case 5:
-      printf("Player 2 | ");
-      break;
+      printf("Player 2 | ");      break;
     }
-    for (i = 1; i < 17; i++) {
-      if (i < 15) {
-        printf("%1d ", cards[j][i]);
-      } else {
-        printf("%2d ", cards[j][i]);
-      }
-      if (i == 14) {
+    for (rank = 1; rank < 17; rank++) {
+      printf("%1d ", cards[suit][rank]);
+      if (rank == 14) {
         printf("| ");
       }
     }
     printf("\n");
-    if (j == 3) {
+    if (suit == 3) {
       printf("---------+-----------------------------+------\n");
     }
   }
   printf("\n");
 }
 
+/*---------------------------------------------------------------------
 // 得点の表示
-void disp_score() {
-  int i;
-  printf("          Player1    Player2\n");
-  printf("---------+----------------------------\n");
-  for (i = 9; i >= 0; i--) {
-    switch (i) {
-    case 9:
-      printf("<<MAX>>  | ");
-      break;
-    case 8:
-      printf("S.Flush  | ");
-      break;
-    case 7:
-      printf("4 cards  | ");
-      break;
-    case 6:
-      printf("Full H.  | ");
-      break;
-    case 5:
-      printf("Flush    | ");
-      break;
-    case 4:
-      printf("Straight | ");
-      break;
-    case 3:
-      printf("3 cards  | ");
-      break;
-    case 2:
-      printf("2 pair   | ");
-      break;
-    case 1:
-      printf("1 pair   | ");
-      break;
-    case 0:
-      printf("no pair  | ");
-      break;
+---------------------------------------------------------------------*/
+void disp_scores() {
+  int hand;
+  printf("               Player1              Player2     \n");
+  printf("            Score suit rank      Score suit rank\n");
+  printf("---------+--------------------------------------\n");
+  for (hand = TOTAL_SCORE; hand >= NO_PAIR; hand--) {
+    switch (hand) {
+    case TOTAL_SCORE:
+      printf("= TOTAL =| "); break;
+    case STRAIGHT_FLUSH:
+      printf("S.Flush  | "); break;
+    case FOUR_OF_A_KIND:
+      printf("4 cards  | "); break;
+    case FULL_HOUSE:
+      printf("Full H.  | "); break;
+    case FLUSH:
+      printf("Flush    | "); break;
+    case STRAIGHT:
+      printf("Straight | "); break;
+    case THREE_OF_A_KIND:
+      printf("3 cards  | "); break;
+    case TWO_PAIR:
+      printf("2 pair   | "); break;
+    case ONE_PAIR:
+      printf("1 pair   | "); break;
+    case NO_PAIR:
+      printf("no pair  | "); break;
     }
-    printf("%4d %3d %3d   %4d %3d %3d\n", score[1][i][0], score[1][i][1],
-           score[1][i][2], score[2][i][0], score[2][i][1], score[2][i][2]);
+    printf("%5d %5d %5d   %5d %5d %5d\n",
+           scores[1][hand][0], scores[1][hand][2], scores[1][hand][1],
+           scores[2][hand][0], scores[2][hand][2], scores[2][hand][1]);
   }
   printf("\n");
 }
 
-// カード管理配列へ、プレーヤーの持っているカードを書き出す
+/*---------------------------------------------------------------------
+// カード管理配列へ、プレーヤーの持っているカードをセットする
+---------------------------------------------------------------------*/
 int set_card(char mycard, int player) {
-  int suits; // 三つ葉、ダイヤ、ハート、スペード
+  int suit;  // 三つ葉、ダイヤ、ハート、スペード
   int rank;  // トランプに書かれている数字
 
-  suits = ((mycard & 0xf0) >> 4) - 4;
-  rank = mycard & 0x0f;
+  suit = ((mycard & 0xf0) >> 4) - 4;
+  rank =  (mycard & 0x0f);
 
   // 例 mycard = 'A' の場合
   // suits = ((mycard & 0xf0) >> 4) - 4;
@@ -382,46 +393,63 @@ int set_card(char mycard, int player) {
   // &) 0b0000_1111
   // --------------
   //    0b0000_0001 // 下４ビットを取り出すことが出来た
-  // 0b0000_0001 = 1 なので rank(トランプの数字)は１と判明する
+  //    0b0000_0001 = 1 なので rank(トランプの数字)は１と判明する
 
-  if (cards[suits][rank] == 0) {
-    cards[suits][rank] = player;
+  // まだどのプレーヤーの手札にもなっていなければ
+  if (cards[suit][rank] == 0) {
+    // playerの手札になっている旨、セットする
+    cards[suit][rank] = player;
     if (rank == 1) {
-      cards[suits][14] = player; //エースの時
+      cards[suit][14] = player; //エースの時
     }
     return 0; //正常終了
+  } else {
+    // 既にいずれかのプレーヤーの手札になっているならば
+    return cards[suit][rank]; //どのプレーヤーで用いられているか返す
   }
-  return cards[suits][rank];
-  //どのプレーヤーで用いられているか返す
 }
 
-// 役の計算
-void calc_card() {
-  int i, j;
+/*---------------------------------------------------------------------
+// cards配列内の縦横集計を行う
+//          | A 2 3 4 5 6 7 8 9 0 J Q K A | P1 P2
+// ---------+-----------------------------+------
+// Clubs    | 0 0 0 0 0 0 0 0 0 1 1 1 1 0 |  5  0
+// Diamonds | 0 0 0 0 0 0 0 0 0 0 0 0 1 0 |  0  0
+// Hearts   | 2 0 0 0 0 0 0 0 0 2 2 2 2 2 |  0  5 <- Player2が5枚の
+// Spades   | 0 0 0 0 0 0 0 0 0 0 0 0 0 0 |  0  0    ♡所持を示す
+// ---------+-----------------------------+------
+// Player 1 | 0 0 0 0 0 0 0 0 0 1 1 1 2 0 |  0  0
+// Player 2 | 1 0 0 0 0 0 0 0 0 1 1 1 1 1 |  0 14 <- Player2は 14(=A)から
+                                      ^              始まるフラッシュを意味する
+                                      |___ Player1は2枚のK所持を示す
+---------------------------------------------------------------------*/
+void calc_cards() {
+  int rank;
+  int suit;
   int sum;
   int player;
-  int mul;
-  int delta;
+  int range;
 
-  // フラッシュ？
+  // フラッシュか判定できるよう、右端集計欄に書き込む
   for (player = 1; player <= 2; player++) {
-    for (j = 0; j <= 3; j++) {
+    for (suit = 0; suit <= 3; suit++) {
       sum = 0;
-      for (i = 1; i <= 13; i++) {
-        if (cards[j][i] == player) {
-          sum += (cards[j][i] / player);
+      for (rank = 1; rank <= 13; rank++) {
+        if (cards[suit][rank] == player) {
+          sum += (cards[suit][rank] / player);
         }
       }
-      cards[j][14 + player] = sum;
+      cards[suit][14 + player] = sum;
     }
   }
 
+  // フラッシュだった場合、右下隅に最高rankを書き込む
   for (player = 1; player <= 2; player++) {
-    for (j = 0; j <= 3; j++) {
-      if (cards[j][14 + player] == 5) {
-        for (i = 14; i >= 5; i--) {
-          if (cards[j][i] == player) {
-            cards[j][14 + player] = i;
+    for (suit = 0; suit <= 3; suit++) {
+      if (cards[suit][14 + player] == 5) {
+        for (rank = 14; rank >= 5; rank--) {
+          if (cards[suit][rank] == player) {
+            cards[suit][14 + player] = rank;
             break;
           }
         }
@@ -429,174 +457,212 @@ void calc_card() {
     }
   }
 
-  // ペア？
+  // 1ペア〜4ペアまで判定しやすいよう、下の合計欄に書き込む
   for (player = 1; player <= 2; player++) {
-    for (j = 1; j <= 14; j++) {
+    for (rank = 1; rank <= 14; rank++) {
       sum = 0;
-      for (i = 0; i <= 3; i++) {
-        if (cards[i][j] == player) {
-          sum += (cards[i][j] / player);
+      for (suit = 0; suit <= 3; suit++) {
+        if (cards[suit][rank] == player) {
+          sum += (cards[suit][rank] / player);
         }
       }
-      cards[3 + player][j] = sum;
+      cards[3 + player][rank] = sum;
     }
   }
 
-  // ストレート？
+  // ストレートだった場合、右下隅に最高rankを書き込む
   for (player = 1; player <= 2; player++) {
-    for (delta = 0; delta <= 9; delta++) {
-      mul = 1;
-      for (i = 1 + delta; i <= 5 + delta; i++) {
-        mul *= cards[3 + player][i];
+    for (rank = 10; rank >= 1; rank--) {
+      sum = 0;
+      // 11111と 連続する5つの範囲の合計を取る
+      for (range = 4; range >=0; range--) {
+        if (cards[3 + player][rank + range] == 1) {
+          sum += cards[3 + player][rank + range];
+        }
       }
-      if (mul != 0) {
-        cards[3 + player][14 + player] = --i;
+      if (sum == 5) {
+        cards[3 + player][14 + player] = rank + 4;
         break;
       }
     }
   }
 }
 
-// 役の判定
-void poker_hands(int player) {
-  int work; // 作業用変数
+/*---------------------------------------------------------------------
+// 役が成立しているか確認し、scores配列へ結果を書き込む
+---------------------------------------------------------------------*/
+void calc_hands() {
+  int rank;
   int suit;
-  int i;
+  int player;
+  int hand;
 
-  work = is_four_of_a_kind(player);
-  suit = is_suit(player, work);
-  score[player][7][1] = work;
-  score[player][7][2] = suit;
+  for (player = 1; player <= 2; player++) {
+    rank = is_four_of_a_kind(player);
+    suit = get_suit(player, rank);
+    scores[player][FOUR_OF_A_KIND][1] = rank;
+    scores[player][FOUR_OF_A_KIND][2] = suit;
 
-  work = is_flush(player);
-  suit = work % 10;
-  score[player][5][1] = work / 10;
-  score[player][5][2] = suit;
+    rank = is_flush(player);
+    suit = rank % 10;
+    scores[player][FLUSH][1] = rank / 10;
+    scores[player][FLUSH][2] = suit;
 
-  work = is_straight(player);
-  suit = is_suit(player, work);
-  score[player][4][1] = work;
-  score[player][4][2] = suit;
+    rank = is_straight(player);
+    suit = get_suit(player, rank);
+    scores[player][STRAIGHT][1] = rank;
+    scores[player][STRAIGHT][2] = suit;
 
-  work = is_three_of_a_kind(player);
-  suit = is_suit(player, work);
-  score[player][3][1] = work;
-  score[player][3][2] = suit;
+    rank = is_three_of_a_kind(player);
+    suit = get_suit(player, rank);
+    scores[player][THREE_OF_A_KIND][1] = rank;
+    scores[player][THREE_OF_A_KIND][2] = suit;
 
-  work = is_two_pair(player);
-  suit = is_suit(player, work);
-  score[player][2][1] = work;
-  score[player][2][2] = suit;
+    rank = is_two_pair(player);
+    suit = get_suit(player, rank);
+    scores[player][TWO_PAIR][1] = rank;
+    scores[player][TWO_PAIR][2] = suit;
 
-  work = is_one_pair(player, 14);
-  suit = is_suit(player, work);
-  score[player][1][1] = work;
-  score[player][1][2] = suit;
+    rank = is_one_pair(player);
+    suit = get_suit(player, rank);
+    scores[player][ONE_PAIR][1] = rank;
+    scores[player][ONE_PAIR][2] = suit;
 
-  work = is_no_pair(player);
-  suit = is_suit(player, work);
-  score[player][0][1] = work;
-  score[player][0][2] = suit;
+    rank = is_no_pair(player);
+    suit = get_suit(player, rank);
+    scores[player][NO_PAIR][1] = rank;
+    scores[player][NO_PAIR][2] = suit;
 
-  // フルハウス？
-  if (score[player][3][1] != 0 && score[player][1][1] != 0) {
-    score[player][6][1] = score[player][3][1];
-    score[player][6][2] = score[player][3][2];
-  }
+    // フルハウス？
+    if (scores[player][THREE_OF_A_KIND][1] != 0 && scores[player][ONE_PAIR][1] != 0) {
+      scores[player][FULL_HOUSE][1] = scores[player][THREE_OF_A_KIND][1];
+      scores[player][FULL_HOUSE][2] = scores[player][THREE_OF_A_KIND][2];
+    }
 
-  // ストレートフラッシュ？
-  if (score[player][4][1] != 0 && score[player][5][1] != 0) {
-    score[player][8][1] = score[player][5][1];
-    score[player][8][2] = score[player][5][2];
-  }
+    // ストレートフラッシュ？
+    if (scores[player][STRAIGHT][1] != 0 && scores[player][FLUSH][1] != 0) {
+      scores[player][STRAIGHT_FLUSH][1] = scores[player][FLUSH][1];
+      scores[player][STRAIGHT_FLUSH][2] = scores[player][FLUSH][2];
+    }
 
-  for (i = 8; i >= 0; i--) {
-    score[player][i][0] = score[player][i][1] * 10 + score[player][i][2];
-  }
+    for (hand = STRAIGHT_FLUSH; hand >= NO_PAIR; hand--) {
+      // 十の位はrank, 一の位はsuitとすることで、
+      // 同じランクであっても、大小関係から強弱を判定できる
+      scores[player][hand][0] = scores[player][hand][1] * 10 + scores[player][hand][2];
+    }
 
-  for (i = 8; i >= 0; i--) {
-    if (score[player][i][0] != 0) {
-      score[player][9][0] = score[player][i][0] + i * 1000;
-      score[player][9][1] = score[player][i][1];
-      score[player][9][2] = score[player][i][2];
-      break;
+    for (hand = STRAIGHT_FLUSH; hand >= NO_PAIR; hand--) {
+      if (scores[player][hand][0] != 0) {
+        scores[player][TOTAL_SCORE][0] = scores[player][hand][0] + hand * 1000;
+        scores[player][TOTAL_SCORE][1] = scores[player][hand][1];
+        scores[player][TOTAL_SCORE][2] = scores[player][hand][2];
+        break;
+      }
     }
   }
 }
 
+/*---------------------------------------------------------------------
 // フラッシュか判定
+---------------------------------------------------------------------*/
 int is_flush(int player) {
-  int i;
-  for (i = 0; i <= 3; i++) {
-    if (cards[i][14 + player] >= 5) {
-      return cards[i][14 + player] * 10 + i + 1;
+  int suit;
+  for (suit = 0; suit <= 3; suit++) {
+    if (cards[suit][14 + player] >= 5) {
+      return cards[suit][14 + player] * 10 + suit + 1;
     }
   }
   return 0; //フラッシュではなかった
 }
 
-// ストレートフラッシュか判定
-int is_straight(int player) { return cards[3 + player][14 + player]; }
+/*---------------------------------------------------------------------
+// ストレートか判定 rankを返す
+---------------------------------------------------------------------*/
+int is_straight(int player) {
+  // calc_cards で計算済みなので、値を返すのみ
+  return cards[3 + player][14 + player];
+}
 
-// フォーカードか判定
+/*---------------------------------------------------------------------
+// フォーカードか判定 rankを返す
+---------------------------------------------------------------------*/
 int is_four_of_a_kind(int player) {
-  int i;
-  for (i = 2; i <= 14; i++) {
-    if (cards[3 + player][i] == 4) {
-      return i;
+  int rank;
+  for (rank = 14; rank >= 2; rank--) {
+    if (cards[3 + player][rank] == 4) {
+      return rank;
     }
   }
   return 0;
 }
 
-// スリーカードか判定
+/*---------------------------------------------------------------------
+// スリーカードか判定 rankを返す
+---------------------------------------------------------------------*/
 int is_three_of_a_kind(int player) {
-  int i;
-  for (i = 2; i <= 14; i++) {
-    if (cards[3 + player][i] == 3) {
-      return i;
+  int rank;
+  for (rank = 14; rank >= 2; rank--) {
+    if (cards[3 + player][rank] == 3) {
+      return rank;
     }
   }
   return 0;
 }
 
-// ツーペアか判定
+/*---------------------------------------------------------------------
+// ツーペアか判定 rankを返す
+---------------------------------------------------------------------*/
 int is_two_pair(int player) {
-  int work;
-  if ((work = is_one_pair(player, 14)) == 0) {
-    return 0;
+  int rank;
+  int max_rank = 0; // 発見したツーペアの内、ランクの高いもの
+  int count = 0;    // 発見したワンペアの数
+  for (rank = 14; rank >= 2; rank--) {
+    if (cards[3 + player][rank] == 2) {
+      if (max_rank < rank) {
+        max_rank = rank;
+      }
+      count++;
+    }
   }
-  if ((is_one_pair(player, work)) == 0) {
-    return 0;
+
+  // ツーペアならば
+  if (count == 2) {
+    return max_rank;
   }
-  return work;
+  return 0;
 }
 
-// 10のペアなら10を返す
-// ペアが見つからなければ0を返す
-int is_one_pair(int player, int search) {
-  int i;
-  for (i = search; i >= 2; i--) {
-    if (cards[3 + player][i] == 2) {
-      return i;
+/*---------------------------------------------------------------------
+// ワンペアか判定 rankを返す
+---------------------------------------------------------------------*/
+int is_one_pair(int player) {
+  int rank;
+  for (rank = 14; rank >= 2; rank--) {
+    if (cards[3 + player][rank] == 2) {
+      return rank;
     }
   }
   return 0;
 }
 
+/*---------------------------------------------------------------------
 // ノーペアか判定
+---------------------------------------------------------------------*/
 int is_no_pair(int player) {
-  int i;
-  for (i = 14; i >= 2; i--) {
-    if (cards[3 + player][i] == 1) {
-      return i;
+  int rank;
+  for (rank = 14; rank >= 2; rank--) {
+    if (cards[3 + player][rank] == 1) {
+      return rank;
     }
   }
   return 0; // error
 }
 
+/*---------------------------------------------------------------------
+// 何のマークか？
 // rank == 13の時、13は何のマークかを返す
-int is_suit(int player, int rank) {
+---------------------------------------------------------------------*/
+int get_suit(int player, int rank) {
   int i;
   for (i = 3; i >= 0; i--) {
     if (cards[i][rank] == player) {
@@ -606,42 +672,37 @@ int is_suit(int player, int rank) {
   return 0; // rankの数のカードは持っていない
 }
 
+/*---------------------------------------------------------------------
 // アスキーアートでカードを表示
-void disp_card(char mycard) {
-  int suits; // 三つ葉、ダイヤ、ハート、スペード
-  char rank; // トランプに書かれている数字
+---------------------------------------------------------------------*/
+void draw_ascii_art(char mycard) {
+  int  suit;  // 三つ葉、ダイヤ、ハート、スペード
+  char rank;  // トランプに書かれている数字
 
-  suits = (mycard & 0xf0) >> 4;
-  rank = mycard & 0x0f;
+  suit = (mycard & 0xf0) >> 4;
+  rank = (mycard & 0x0f);
+
   switch (rank) {
-  case 1:
-    rank = 'A';
-    break;
-  case 11:
-    rank = 'J';
-    break;
-  case 12:
-    rank = 'Q';
-    break;
-  case 13:
-    rank = 'K';
-    break;
+  case 11: rank = 'J'; break;
+  case 12: rank = 'Q'; break;
+  case 13: rank = 'K'; break;
+  case 14: rank = 'A'; break;
+  case  1: rank = 'A'; break;
   }
-  // printf("mycard: %x suits: %x, rank: %x\n", mycard, suits, rank);
 
-  switch (suits) {
+  switch (suit) {
   case CLUBS:
     if (2 <= rank && rank <= 10) {
-      printf("      ∩  \n");
-      printf("   （　） \n");
-      printf("  ／ %2d ＼\n", rank);
+      printf("      ∩      \n");
+      printf("    （　）    \n");
+      printf("   ／ %2d ＼  \n", rank);
       printf("⊂__________⊃\n");
       printf("      ∧      \n");
       printf("    ／＿＼    \n");
     } else {
-      printf("      ∩  \n");
-      printf("   （　） \n");
-      printf("  ／  %c ＼\n", rank);
+      printf("      ∩      \n");
+      printf("    （　）    \n");
+      printf("   ／  %c ＼   \n", rank);
       printf("⊂__________⊃\n");
       printf("      ∧      \n");
       printf("    ／＿＼    \n");
@@ -649,51 +710,51 @@ void disp_card(char mycard) {
     break;
   case DIAMONDS:
     if (2 <= rank && rank <= 10) {
-      printf("     ／＼    \n");
-      printf("   ／　　＼  \n");
-      printf(" ／　　　　＼\n");
-      printf(" ＼　 %2d 　／\n", rank);
-      printf("   ＼　　／  \n");
-      printf("     ＼／    \n");
+      printf("     ／＼     \n");
+      printf("   ／　　＼   \n");
+      printf(" ／　 %2d　 ＼\n", rank);
+      printf(" ＼　     　／\n");
+      printf("   ＼　　／   \n");
+      printf("     ＼／     \n");
     } else {
-      printf("     ／＼    \n");
-      printf("   ／　　＼  \n");
-      printf(" ／　　　　＼\n");
-      printf(" ＼　 %c 　／\n", rank);
-      printf("   ＼　　／  \n");
-      printf("     ＼／    \n");
+      printf("     ／＼     \n");
+      printf("   ／　　＼   \n");
+      printf(" ／　  %c　 ＼ \n", rank);
+      printf(" ＼　     　／\n");
+      printf("   ＼　　／   \n");
+      printf("     ＼／     \n");
     }
     break;
   case HEARTS:
     if (2 <= rank && rank <= 10) {
-      printf(" ／￣＼／￣＼\n");
+      printf(" ／￣＼／￣＼ \n");
       printf("｜　　　　　｜\n");
-      printf(" ＼　 %2d 　／\n", rank);
-      printf("   ＼　　／  \n");
-      printf("     ＼／    \n");
-      printf("             \n");
+      printf("｜　  %2d  　｜\n", rank);
+      printf(" ＼　     　／\n");
+      printf("   ＼　　／   \n");
+      printf("     ＼／     \n");
     } else {
-      printf(" ／￣＼／￣＼\n");
+      printf(" ／￣＼／￣＼ \n");
       printf("｜　　　　　｜\n");
-      printf(" ＼　 %c  　／\n", rank);
-      printf("   ＼　　／  \n");
-      printf("     ＼／    \n");
-      printf("             \n");
+      printf("｜　   %c  　｜\n", rank);
+      printf(" ＼　     　／\n");
+      printf("   ＼　　／   \n");
+      printf("     ＼／     \n");
     }
     break;
   case SPADES:
     if (2 <= rank && rank <= 10) {
-      printf("     ／＼    \n");
-      printf("   ／　　＼  \n");
-      printf(" ／　　　　＼\n");
-      printf("｜　　%2d　　｜\n", rank);
+      printf("     ／＼      \n");
+      printf("   ／　　＼    \n");
+      printf(" ／　 %2d 　＼  \n", rank);
+      printf("｜　　  　　｜\n");
       printf(" ＼＿    ＿／  \n");
       printf("    ／＿＼     \n");
     } else {
-      printf("     ／＼    \n");
-      printf("   ／　　＼  \n");
-      printf(" ／　　　　＼\n");
-      printf("｜　　%c 　　｜\n", rank);
+      printf("     ／＼      \n");
+      printf("   ／　　＼    \n");
+      printf(" ／　  %c 　＼ \n", rank);
+      printf("｜　　  　　｜ \n");
       printf(" ＼＿    ＿／  \n");
       printf("    ／＿＼     \n");
     }
@@ -701,35 +762,43 @@ void disp_card(char mycard) {
   }
 }
 
-/* 0-n未満の数を返す */
-int my_random(int n) { return clock() % n; }
-
-// カードをランダムに引く
-char get_card() {
-  int suits; // 三つ葉、ダイヤ、ハート、スペード
-  int rank;  // トランプに書かれている数字
-
-  suits = my_random(4);
-  rank = my_random(13) + 1;
-  return ((suits + 4) << 4) + rank;
+/*---------------------------------------------------------------------
+// 0-n未満の数を返す
+---------------------------------------------------------------------*/
+int my_random(int n) {
+  return clock() % n;
 }
 
+/*---------------------------------------------------------------------
+// カードをランダムに引く
+---------------------------------------------------------------------*/
+char get_card() {
+  int suit; // 三つ葉、ダイヤ、ハート、スペード
+  int rank; // トランプに書かれている数字
+
+  suit = my_random(4);
+  rank = my_random(13) + 1;
+  return ((suit + 4) << 4) + rank;
+}
+
+/*---------------------------------------------------------------------
 // 一時停止
+---------------------------------------------------------------------*/
 void pause() {
-  printf(" === press return key === ");
+  printf("\n === press return key === \n");
   while (getchar() != '\n')
     ;
 }
 
+/*---------------------------------------------------------------------
 // 使い方表示
+---------------------------------------------------------------------*/
 void usage(char const *argv[]) {
   printf(" --- 使い方 --- \n");
-  printf("1)");
-  printf("%s -f filename\n", argv[0]);
-  printf("指定されたファイルからplayer1, player2の手を読み込みます\n");
+  printf("1) %s -f cards.txt\n", argv[0]);
+  printf("指定されたファイル cards.txt からプレーヤーの手を読み込みます\n");
   printf("\n");
-  printf("2)");
-  printf("%s -m\n", argv[0]);
+  printf("2) %s -m\n", argv[0]);
   printf("交互にランダムでカードを引きます\n");
   printf("\n");
 }

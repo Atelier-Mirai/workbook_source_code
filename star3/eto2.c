@@ -4,7 +4,7 @@
 
 int main(int argc, char const *argv[]) {
   // 入力を促すメッセージ表示
-  printf("何年生まれですか? (例: S30) >\n");
+  printf("何年生まれですか? (例: S30) > ");
 
   // 8文字までキーボードから入力を受け取れるよう、バッファを用意
   char buffer[8];
@@ -34,9 +34,9 @@ int main(int argc, char const *argv[]) {
   // 読み込めているか、確認
   // printf("キーボードからの入力は、\n%s です。\n", buffer);
 
-  // 入力文字列の先頭が、M, T, S, H で始まっているか確認し、西暦年に変換する
+  // 入力文字列の先頭が、M, T, S, H, R で始まっているか確認し、西暦年に変換する
   int year;         // 西暦年
-  char era_initial; // 明治: 'M', 大正: 'T', 昭和: 'S', 平成: 'H'
+  char era_initial; // 明治: 'M', 大正: 'T', 昭和: 'S', 平成: 'H', 令和: 'R'
   char era_year[3]; // 元号で何年か
 
   // S30 と入力されていた場合、
@@ -56,8 +56,9 @@ int main(int argc, char const *argv[]) {
   // 数値変換不可の文字列の長さを調べる。
   if (strlen(endptr) != 0) {
     // エラーメッセージ出力
-    printf("%s は、元号年として認識出来ませんでした。\n", endptr);
-    exit(1);
+    printf("年数の入力が誤っています。\n", endptr);
+    // プログラムを終了
+    exit(1);  // エラーコード1(異常終了)を返します
   }
 
   switch (era_initial) {
@@ -73,18 +74,22 @@ int main(int argc, char const *argv[]) {
   case 'H':
     year += 1988;
     break;
+  case 'R':
+    year += 2018;
+    break;
   default:
     // エラーメッセージ出力
-    printf("%c は、元号の文字として認識出来ませんでした。\n", era_initial);
-    exit(1);
+    printf("元号の文字ではありません。\n");
+    // プログラムを終了
+    exit(2);  // エラーコード2(異常終了)を返します
   }
 
   // 干支の算出方法は、前回と同様
   // 干支の配列 (12で割り切れる年は申年)
   char *eto[] = {"申", "酉", "戌", "亥", "子", "丑",
                  "寅", "卯", "辰", "巳", "午", "未"};
-  printf("%c%s年(%d年)生まれのあなたの干支は、%s です。\n", era_initial,
-         era_year, year, eto[year % 12]);
+  printf("%c%s年(%d年)生まれのあなたの干支は、%s です。\n",
+         era_initial, era_year, year, eto[year % 12]);
 
   return 0;
 }

@@ -1,7 +1,7 @@
 #include <stdio.h>
 
 int main(int argc, char const *argv[]) {
-  int year = 2000;
+  int year = 2000;  // グレゴリオ暦年
 
   // switch case 文で、余りに応じて、それぞれの干支を表示します。
   switch (year % 12) {
@@ -61,10 +61,10 @@ int main(int argc, char const *argv[]) {
 
   int index;
   index = year % 12;
-  printf("あなたの干支は、%s です。\n", eto[index]);
+  printf("あなたの干支は、%s年 です。\n", eto[index]);
 
   // 一行に纏めて書くことも出来ます。
-  printf("あなたの干支は、%s です。\n", eto[year % 12]);
+  printf("あなたの干支は、%s年 です。\n", eto[year % 12]);
 
   return 0;
 }

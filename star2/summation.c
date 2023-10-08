@@ -16,10 +16,6 @@ int main(int argc, char const *argv[]) {
   }
 
   // 結果発表
-  for (i = 0; i < 10; i++) {
-    printf("array[%d]: %2d \n", i, array[i]);
-    // sum += array[i]; と書くことも出来ます。
-  }
   printf(" 合計は  %d です。\n", sum);
 
   return 0;

@@ -29,8 +29,8 @@ def c_to_ruby(filename, path)
         line = line.gsub("int ", "")
         line = line.gsub("float ", "")
         line = line.gsub("double ", "")
-        line = line.gsub(/^\/(\**)/, ruby_comment)
-        line = line.gsub(/(\**)\//, ruby_comment)
+        # line = line.gsub(/^\/(\**)/, ruby_comment)
+        # line = line.gsub(/(\**)\//, ruby_comment)
         output << line
       end
     end

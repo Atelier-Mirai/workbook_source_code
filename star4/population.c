@@ -23,7 +23,6 @@ int main(int argc, char const *argv[]) {
     printf("%d 年後の人口は %ld 人です。\n", year, population);
   }
 
-  // おまけ
   // ３桁ごとにカンマ区切りで出してみましょう。
   // 数としての人口を文字列に変換します。
   char str_population[32];         // 世界人口が入った文字列

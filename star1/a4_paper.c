@@ -1,4 +1,4 @@
-#include <stdio.h>
+#include <stdio.h>  // 標準入出力関数
 
 int main(int argc, char const *argv[]) {
   // 変数宣言

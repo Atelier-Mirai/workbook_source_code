@@ -1,7 +1,7 @@
-#include <math.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include <stdio.h>  // 標準入出力関数
+#include <math.h>   // 数学関数
+#include <string.h> // 文字列操作関数
+#include <stdlib.h> // rand関数
 
 // 分かりやすさのために、
 // 真であることを示すTRUE,

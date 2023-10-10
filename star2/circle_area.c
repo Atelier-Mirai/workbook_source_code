@@ -1,8 +1,8 @@
-#include <math.h> // 円周率 M_PI が定義されています
-#include <stdio.h>
+#include <stdio.h>  // 標準入出力関数
+#include <math.h>   // 数学関数
 
 int main(int argc, char const *argv[]) {
-  int radius = 10;                     // 円の半径
+  int radius  = 10;                    // 円の半径
   double area = pow(radius, 2) * M_PI; // 円の面積
                                        // pow関数で、2乗を求めています。
 

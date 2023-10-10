@@ -5,10 +5,10 @@
  * オープニング・エンディングもあると楽しいですね。*
  **************************************************************************/
 
-#include "mt.h"          // 乱数のために
-#include <stdio.h>
-#include <string.h>
-#include <unistd.h>      // sleep関数のために
+#include "mt.h"     // Merusenne Twister法による乱数
+#include <stdio.h>  // 標準入出力関数
+#include <string.h> // 文字列操作関数
+#include <unistd.h> // sleep関数
 
 #define MAP_SIZE      22 // 0-21 までの升目がある
 #define GOAL_POSITION 21 // 21 の升目が、上がり

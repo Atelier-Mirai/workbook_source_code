@@ -1,5 +1,5 @@
-#include <math.h> // pow 関数
-#include <stdio.h>
+#include <stdio.h>  // 標準入出力関数
+#include <math.h>   // 数学関数
 
 int main(int argc, char const *argv[]) {
   int n;

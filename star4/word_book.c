@@ -7,8 +7,8 @@
  * 10問出題して、英語力向上を目指しましょう。
  **************************************************************************/
 
-#include "mt.h"
-#include <stdio.h>
+#include "mt.h"     // Merusenne Twister法による乱数
+#include <stdio.h>  // 標準入出力関数
 
 #define CHOICES_SIZE    3 // 三択で出題する
 #define REGISTERD_WORD 10 // 登録単語数

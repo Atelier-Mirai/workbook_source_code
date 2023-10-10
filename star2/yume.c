@@ -52,8 +52,8 @@ https://www.enshuryu.com/茶道具/落語-「-太閤と曽呂利」/
 それだけのお米を作るためには、何町歩の田んぼが必要でしょうか。
 =====================================================================*/
 
-#include <stdio.h>
-#include <math.h>
+#include <stdio.h>  // 標準入出力関数
+#include <math.h>   // 数学関数
 
 int main(int argc, char const *argv[]) {
 

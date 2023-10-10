@@ -16,10 +16,11 @@
 // AからBの範囲の整数の乱数が欲しいときには
 // genrand_int32()%(B-A+1)+A;
 // のような関数を用いればよい。
-#include <math.h>
-#include <stdio.h>
-#include <string.h>
-#include <time.h>
+
+#include <stdio.h>  // 標準入出力関数
+#include <math.h>   // 数学関数
+#include <string.h> // 文字列操作関数
+#include <time.h>   // time関数
 
 int main(int argc, char const *argv[]) {
   int operand1;         // 第一被演算子

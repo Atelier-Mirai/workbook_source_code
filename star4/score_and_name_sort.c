@@ -13,9 +13,9 @@
  *  qsortの利用方法については、
  *  http://www.cc.kyoto-su.ac.jp/~yamada/ap/qsort.html より、引用
  **************************************************************************/
-#include <stdio.h>
-#include <stdlib.h> // quicksort
-#include <string.h>
+#include <stdio.h>  // 標準入出力関数
+#include <stdlib.h> // quicksort関数
+#include <string.h> // 文字列操作関数
 
 // 比較関数（大小判断を返す関数）
 int compare_int(const void *a, const void *b) {

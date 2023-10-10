@@ -7,10 +7,10 @@
  * https://ja.wikipedia.org/wiki/正規表現
  * https://rubular.com 参照
  **************************************************************************/
-#include <regex.h> // 正規表現 regcomp, regex
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include <stdio.h>  // 標準入出力関数
+#include <stdlib.h> // exit関数
+#include <string.h> // 文字列操作関数
+#include <regex.h>  // 正規表現
 
 // 漢字変換に用いる定数
 // main の外側に書かれているので、どの関数からでも参照可能

@@ -1,6 +1,14 @@
-#include "util.h" // 自作のrandom_number関数
-#include <stdio.h>
-#include <string.h>
+#include <stdio.h>  // 標準入出力関数
+#include <string.h> // 文字列操作関数
+#include <stdlib.h> // rand関数
+#include <time.h>   // time関数
+
+// 乱数はよく使うので、関数化してみました。
+// 同じプログラムを何度も書かずに済むので、便利です。
+// 自作したrandom_number()関数が定義されています。
+// 自作のヘッダーファイルを読み込む際は、
+// "(ダブルクォーテーション)で囲みます。
+#include "random_number.h"
 
 int main(int argc, char const *argv[]) {
   // 福引きの等級名

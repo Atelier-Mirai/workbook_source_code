@@ -1,5 +1,5 @@
-#include <stdio.h>
-#include <stdlib.h> // atoi関数用
+#include <stdio.h>  // 標準入出力関数
+#include <stdlib.h> // atoi関数
 
 int main(int argc, char const *argv[]) {
   // コマンドラインから、降水確率を渡すことも出来ます。

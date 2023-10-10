@@ -56,10 +56,10 @@
 // ですので、どちらの役もフラッシュです。
 /**************************************************************************/
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <time.h>
+#include <stdio.h>  // 標準入出力関数
+#include <stdlib.h> // exit関数
+#include <string.h> // 文字列操作関数
+#include <time.h>   // 日付時刻の操作用関数
 
 // 文字列用のバッファサイズ
 #define BUFFER_SIZE 255

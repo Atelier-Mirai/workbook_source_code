@@ -1,6 +1,5 @@
-#include "util.h"   // 自作関数いろいろの定義
-#include <limits.h> // 整数の取り得る範囲が定義されています。
-#include <stdio.h>
+#include <stdio.h>  // 標準入出力関数
+#include <limits.h> // 整数の取り得る範囲
 
 int main(int argc, char const *argv[]) {
   // 10個の数字が入った配列 纏めて初期値を与えています。

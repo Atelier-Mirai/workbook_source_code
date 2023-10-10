@@ -3,10 +3,15 @@
  * 桁数と、演算の種類をリクエストするようになっています。
  * 簡単なものを創って、より高機能のものへと、拡張していくと良いです。
  **************************************************************************/
-#include "util.h" // 自作の乱数などの定義
-#include <math.h>
-#include <stdio.h>
-#include <string.h>
+#include <stdio.h>  // 標準入出力関係です。
+#include <math.h>   // 数学関係の関数が定義されています。
+#include <string.h> // 文字列操作に関する関数が定義されています。
+#include <stdlib.h> // rand関数が定義されています。
+#include <time.h>   // time関数が定義されています。
+// 自作したrandom_number()関数が定義されています。
+// 自作のヘッダーファイルを読み込む際は、
+// "(ダブルクォーテーション)で囲みます。
+#include "random_number.h"
 
 int main(int argc, char const *argv[]) {
   int operand1;         // 第一被演算子

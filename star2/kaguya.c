@@ -9,8 +9,8 @@
 紙の厚みは「1024枚で10cm」とします。
 =====================================================================*/
 
-#include <stdio.h>
-#include <math.h>
+#include <stdio.h>  // 標準入出力関数
+#include <math.h>   // 数学関数
 
 int main(int argc, char const *argv[]) {
 

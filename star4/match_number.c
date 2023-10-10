@@ -10,9 +10,8 @@
  * これを繰り返すことで、事前に用意された数字、９４３を当てるゲームです。
  **************************************************************************/
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include <stdio.h>  // 標準入出力関数
+#include <string.h> // 文字列操作関数
 
 int main(int argc, char const *argv[]) {
   int right_number[] = {9, 4, 3}; // 事前に用意された数

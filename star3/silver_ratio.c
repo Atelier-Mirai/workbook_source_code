@@ -34,8 +34,8 @@
   https://www.tcpc.co.jp/columns/index049
 =====================================================================*/
 
-#include <stdio.h>
-#include <math.h>
+#include <stdio.h>  // 標準入出力関数
+#include <math.h>   // 数学関数
 
 // 短辺と長辺を与えると、二つ折りにした紙の長さを返す関数
 void half_swap(int *short_side, int *long_side);

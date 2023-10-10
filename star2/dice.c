@@ -1,6 +1,6 @@
-#include <stdio.h>
-#include <stdlib.h> // rand関数が定義されています。
-#include <time.h>   // time関数が定義されています。
+#include <stdio.h>  // 標準入出力関数
+#include <stdlib.h> // rand関数
+#include <time.h>   // time関数
 
 int main(int argc, char const *argv[]) {
   int dice;
@@ -9,7 +9,7 @@ int main(int argc, char const *argv[]) {
   // 乱数の種を播きます。
   srand(time(NULL));
 
-  // ６で割った余りに、1を加えることで、
+  // ６で割った余りに 1を加えることで、
   // １〜６までの乱数が得られます。
   dice = rand() % 6 + 1;
   printf("サイコロの目は %d です。\n", dice);

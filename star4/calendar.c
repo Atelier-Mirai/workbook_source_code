@@ -6,9 +6,9 @@
  *   ７で割った余りを求めることで、曜日が計算出来ます）
  **************************************************************************/
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include <stdio.h>  // 標準入出力関数
+#include <stdlib.h> // exit関数
+#include <string.h> // 文字列操作関数
 
 // ツェラーの公式(Zeller's congruence)により 曜日を返す関数
 // 戻り値が 0, 1, 2, 3, 4, 5, 6 の場合、

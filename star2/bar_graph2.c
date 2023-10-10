@@ -1,4 +1,4 @@
-#include <stdio.h>
+#include <stdio.h>  // 標準入出力関数
 
 // 自作の関数を創って、解くことも出来ます。
 
@@ -16,12 +16,19 @@ int main(int argc, char const *argv[]) {
   int black_number; // 黒い■の数
   int white_number; // 白い□の数
 
+  // 表示させたい棒グラフの値配列
+  int values[] = {1, 4, 7, 3, 2};
+
+  // 値配列の要素数が5なので、5行繰り返せば良いです。
+  // 予め配列要素の要素数を求めておくと、より汎用的になります。
   for (row = 0; row < 5; row++) {
-    black_number = 5 - row; // 黒い■の数
-    white_number = row;     // 白い□の数
+    black_number = values[row];       // 黒い■の数
+    // 値配列の最大値が7なので、7から引いています。
+    // 予め配列要素の最大値を求めておくと、より汎用的になります。
+    white_number = 7 - black_number;  // 白い□の数
 
     // 黒い■と白い□を表示する関数を呼び出し、表示を任せます。
-    black_white_number(black_number, white_number);
+    black_white_box(black_number, white_number);
   }
 
   return 0;

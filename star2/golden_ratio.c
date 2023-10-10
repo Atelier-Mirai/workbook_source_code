@@ -21,14 +21,14 @@
          -b ± √b^2 - 4ac
    x = ---------------------
               2
-  
+
          1 ± √5
      = ------------- と求められます。
             2
 =====================================================================*/
 
-#include <stdio.h>
-#include <math.h>
+#include <stdio.h>  // 標準入出力関数
+#include <math.h>   // 数学関数
 
 int main(int argc, char const *argv[]) {
   double a  =  1; // 浮動小数点数として計算したいので、double型として宣言します。

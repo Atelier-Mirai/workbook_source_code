@@ -1,24 +1,19 @@
-#include <stdio.h>
-#include <stdlib.h> // rand関数が定義されています。
-#include <time.h>   // time関数が定義されています。
+#include <stdio.h>  // 標準入出力関数
+#include <stdlib.h> // rand関数
+#include <time.h>   // time関数
 
-// 機能：0〜max以下の乱数を返す
-// 引数：int max 乱数の最大値
-// 戻値：0〜max以下の乱数
-int random_number(int max);
-
-// 0〜max以下の乱数を返す関数
-int random_number(int max) {
-  srand(time(NULL));
-  return (rand() % (max + 1));
-}
+// 乱数はよく使うので、関数化してみました。
+// 同じプログラムを何度も書かずに済むので、便利です。
+// 自作したrandom_number()関数が定義されています。
+// 自作のヘッダーファイルを読み込む際は、
+// "(ダブルクォーテーション)で囲みます。
+#include "random_number.h"
 
 int main(int argc, char const *argv[]) {
-  // 乱数はよく使うので、関数化してみました。
-  // 同じプログラムを何度も書かずに済むので、便利です。
-
   // 降水確率 0 - 100 % の範囲の乱数
   // 補完機能が働くので、長い変数名でも良いですが、長すぎるかもしれません。
+  // 分かりやすいプログラムを書くために、
+  // 良い名前を付けてください。
   // 降水確率は 10% 単位なので、0〜10までの乱数を10倍しています。
   int precipitation_probability = random_number(10) * 10;
 

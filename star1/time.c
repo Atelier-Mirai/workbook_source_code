@@ -1,5 +1,4 @@
-#include <stdio.h>
-#include <time.h> // 時刻に関する関数がいろいろ用意されています。（今回未使用）
+#include <stdio.h> // 標準入出力関数
 
 int main(int argc, char const *argv[]) {
   int time = 123456789;

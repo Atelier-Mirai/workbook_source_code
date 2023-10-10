@@ -6,10 +6,10 @@
  * 生後30000日目を迎えるのは、何年何月何日でしょうか？
  **************************************************************************/
 
-#include <math.h>   // floor関数のために
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include <stdio.h>  // 標準入出力関数
+#include <math.h>   // 数学関数
+#include <stdlib.h> // exit関数
+#include <string.h> // 文字列操作関数
 #include <time.h>   // 日付時刻の操作用関数
 
 // グレゴリオ暦から修正ユリウス日を返す為の関数

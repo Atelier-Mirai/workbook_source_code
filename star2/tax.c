@@ -1,5 +1,6 @@
-#include <math.h> // floor, ceil関数
-#include <stdio.h>
+#include <stdio.h> // 標準入出力関数
+#include <math.h>  // 数学関数
+
 
 // 消費税率
 // 定数として定義にしておくと、変更があった場合の修正が楽です。

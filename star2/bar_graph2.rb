@@ -23,17 +23,25 @@ def black_white_box_with_keyword(black_box: black, white_box: white)
   # "■" * black_box と「キーワード名」を書いていることに注意してください。
 end
 
-(0...5).each do |row|
-  black_number = 5 - row # 黒い■の数
-  white_number = row     # 白い□の数
+# 表示させたい棒グラフの値配列
+values    = [1, 4, 7, 3, 2]
+max_value = values.max
 
-  # black_white_number関数を呼び出し、
-  # 結果を print メソッドで表示します。
-  print black_white_box_with_keyword(black_number, white_number)
+# 値配列から要素を取り出し、繰り返します。
+values.each do |value|
+  black_number = value             # 黒い■の数
+  white_number = max_value - value # 白い□の数
 
-  # black_white_box関数を呼び出し、結果を print メソッドで表示します。
-  # キーワード引数を用いたので、
-  # white, black の順番でも、支障なく動作します。
+  # black_white_box 関数を呼び出し、結果を表示します。
+  print black_white_box(black_number, white_number)
+end
+
+
+# キーワード引数を用いて、メソッド呼び出しを行う例です。
+# white, black の順で引数を指定しても、支障なく動作します。
+values.each do |value|
+  black_number = value             # 黒い■の数
+  white_number = max_value - value # 白い□の数
   print black_white_box_with_keyword(white_box: white_number,
                                      black_box: black_number)
 end

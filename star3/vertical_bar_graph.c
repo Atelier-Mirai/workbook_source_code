@@ -1,5 +1,5 @@
-#include <stdio.h>
-#include <string.h>
+#include <stdio.h>  // 標準入出力関数
+#include <string.h> // 文字列操作関数
 
 // グラフのX軸, Y軸の上限を定義
 #define X_MAX 5

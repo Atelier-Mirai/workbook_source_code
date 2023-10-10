@@ -7,64 +7,39 @@ INT_MAX = 21_4748_3647
 # 10個の数字が入った並び替え前の配列
 array = [3, 15, 22, 81, 41, 83, 72, 0, 50, 33]
 
-
-# (a) 最小値を求める処理
-min = INT_MAX  # 最小値を格納する変数
-array.each do |member|
-  if min > member
-    min = member
-  end
-end
-
-# (b) min は 配列の最小値 0 となっています。
-# 最小値0 が array の何番目の要素であったかを求めてみましょう。
-index = 0 # 最小値 min が何番目の要素であるか
-(0...10).each do |i|
-  if array[i] == min
-    index = i
-    break
-  end
-end
-
-puts "(a)(b)それぞれ行った場合の結果表示"
-(0...10).each do |i|
-  printf "array[%d]: %2d\n", i, array[i]
-end
-printf "min: %d index: %d\n", min, index
-
-# ここで、(a) と (b) 同時に出来るのではと思えて来ます。
-# Ruby には 要素とその添字を取得できる
-# each_with_index メソッドが用意されています。
-# 一緒に書くと、次のようになります。
-# 最小値を求めると同時に、最小値 min が何番目の要素であるか求める
+# 最小値を求めると同時に、
+# 最小値 min が何番目の要素であるか求める処理
 min   = INT_MAX
 index = 0
 array.each_with_index do |member, i|
   if min > array[i]
-    min   = array[i] # (a)
-    index = i        # (b)
+    min   = array[i] # (a) 最小値を求める
+    index = i        # (b) 添字を求める
   end
 end
 
-puts "(a)(b)纏めて行った場合の結果表示"
-(0...10).each do |i|
-  printf "array[%d]: %2d\n", i, array[i]
-end
-printf "min: %d index: %d\n", min, index
+# 最小値 min が 0 で、
+# その添字 index は 7 と判明しましたので、
+# 配列の一番最後に 0 を入れることにします。
+# そのまま入れると最後の値 33 が消えてしまうので、
+# 後ろの要素を前の要素に詰めてから、
+# 最後に0を入れることにします。
+# {3, 15, 22, 81, 41, 83, 72,  0, 50, 33}
+#                                ／ ／
+#                              ↓ ↓
+# {3, 15, 22, 81, 41, 83, 72, 50, 33,  0}
+#                                      ↑
+#                                     最小値を最後に入れる
 
-# index には、7番目と入っています。
-# 後ろの要素を前の要素に詰めます。
 # array[7] に array[8] を代入して、
 # array[8] に array[9] を代入します。
 (index...9).each do |i|
   array[i] = array[i + 1]
 end
 
-# 前回は、array[9] は特に処理せず、そのままでしたが、
-# 今回は、array[9] に、今求めた、一番小さい数を入れます。
+# array[9] に今求めた一番小さい数を入れます。
 array[9] = min
 
-# 一番小さい数が、array の最後に来ているはずです。
 # 確認の為に出力してみましょう。
 puts "一番小さい数が、最後に来ていることの確認"
 (0...10).each do |i|
@@ -89,8 +64,8 @@ end
   min = INT_MAX
   0.upto(sorted) do |i|
     if min > array[i]
-      min   = array[i] # (a)
-      index = i        # (b)
+      min   = array[i]
+      index = i
     end
   end
   (index...sorted).each do |i|

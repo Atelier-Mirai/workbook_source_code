@@ -12,7 +12,7 @@ void black_white_box(int black_number, int white_number);
 int main(int argc, char const *argv[]) {
   // 変数名は、i でも良いですが、
   // 行の変数であることが分かるようにすると良いです。
-  int row;       // 行
+  int row;          // 行
   int black_number; // 黒い■の数
   int white_number; // 白い□の数
 

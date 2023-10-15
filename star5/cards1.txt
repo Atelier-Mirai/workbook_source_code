@@ -1,11 +1,11 @@
 /***************************************************
  * カードの表現
- *          |A234567890JQK
- * ---------+-------------
- * ♣️Club   |ABCDEFGHIJKLM
- * ♦︎Diamond|QRSTUVWXYZ[\]
- * ♡Heart  |abcdefghijklm
- * ♠️Spade  |qrstuvwxyz{|}
+ *        |A234567890JQK
+ * -------+-------------
+ * Club   |ABCDEFGHIJKLM
+ * Diamond|QRSTUVWXYZ[\]
+ * Heart  |abcdefghijklm
+ * Spade  |qrstuvwxyz{|}
  *
  * 例）Cards と書くと
  * Cは Club(三つ葉)の3

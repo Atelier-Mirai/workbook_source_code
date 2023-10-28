@@ -1,14 +1,10 @@
 /**************************************************************************
  * 連結リスト
  * https://ja.wikipedia.org/wiki/連結リスト
- * http://bituse.info/c/39
- *
- * 変数や関数に使われる必要最低限の単語を覚える
- * http://oxynotes.com/?p=8679#7
  *
  * マージソート
  * https://ja.wikipedia.org/wiki/マージソート
- * http://ppp-lab.sakura.ne.jp/ProgrammingPlacePlus/algorithm/sort/007.html
+ * https://programming-place.net/ppp/contents/algorithm/sort/007.html
  **************************************************************************/
 #include <stdio.h>
 #include <stdlib.h>
@@ -16,8 +12,8 @@
 
 // 関数プロトタイプ宣言
 list_t *merge(list_t *a, list_t *b);
-list_t *merge_sort_recursive(list_t *list);
-void merge_sort(list_t *list);
+list_t *merge_sort(list_t *list);
+// void merge_sort(list_t *list);
 
 int main(int argc, char const *argv[]) {
   // 線形リスト宣言と、一番最初のノード生成
@@ -57,69 +53,62 @@ int main(int argc, char const *argv[]) {
   return 0;
 }
 
-// マージ（併合）
+// 二つのリストを併合（マージ）する
 list_t *merge(list_t *a, list_t *b) {
-  list_t result;       // *result ではないので注意
-  list_t *w = &result; // work 変数
+  list_t result;        // 併合されたリスト
+  list_t *w = &result;  // work 変数
+                        // これを起点に、a, b 小さい方を順に連結していく
 
   // リストをマージ
   while (a != NULL && b != NULL) {
-    // 動作確認用
-    // printf("a->value: %d b->value: %d\n", a->value, b->value);
-
-    // 昇順にソートするので、小さい方の要素を結果を優先する
-    // == の場合は先頭を優先すると安定なソートになる
+    // 昇順ソートのため、小さい要素を先にする。
+    // a と b が等しい場合は、先頭を優先すると安定ソートとなる。
     if (a->value <= b->value) {
-      w->next = a;
-      w = w->next;
-      a = a->next;
+      w->next = a;        // wの後ろにaを連結する
+      w       = w->next;  // aを連結したので、さらに小さい数を連結できるよう
+                          // 次のノードに進む
+      a       = a->next;  // a の次のノードに進む
     } else {
       w->next = b;
-      w = w->next;
-      b = b->next;
+      w       = w->next;
+      b       = b->next;
     }
   }
-  // 動作確認用
-  // printf("a: %p b: %p\n", a, b);
 
   // 残っている要素を、末尾へ連結
   if (a == NULL) {
+    // a が短かったということなので、余っているbのノードを繋ぐ
     w->next = b;
   } else {
     w->next = a;
   }
-  // 動作確認用
-  // printf("a: %p b: %p w: %p\n", a, b, w);
-  // printf("result.next: %p\n", result.next);
+
+  // 併合されたリストを返す
   return result.next;
 }
 
-// マージソート (再帰部分、昇順)
-list_t *merge_sort_recursive(list_t *list) {
+// リストを二分割し、再帰的にマージする
+list_t *merge_sort(list_t *list) {
   // 動作確認用
-  // printf("recursive\n");
-
   list_t *a;
   list_t *b;
   list_t *w; // work 変数
 
-  // 要素が１つしかなければ終了
+  // 要素が0又は1であれば終了
   if (list == NULL || list->next == NULL) {
-    // 動作確認用
-    // printf("list one: %p\n", list);
     return list;
   }
 
-  // ２つのリストに分割するため、リストの中心を探す
+  // ２つのリストに分割するため、リストの中心を探す。
+  // a はリストの先頭を指し、b はリストの二番目のノードを指す。
+  // a が一つ進む間に、b は二つ進むので、
+  // b がリストの末尾に辿り着いた時には、
+  // a は リストのちょうど中央を指している。
   a = list;
   b = list->next;
-
-  // 動作確認用
-  // printf("a: %p b: %p\n", a, b);
   if (b != NULL) {
     b = b->next;
   }
-
   while (b != NULL) {
     a = a->next;
     b = b->next;
@@ -128,28 +117,21 @@ list_t *merge_sort_recursive(list_t *list) {
     }
   }
 
-  // リストを前半と後半に分離
+  // 動作確認用
+  // printf("------- a ------- \n");
+  // show_list(a);
+
+  // リストを前半と後半に分離する
+  // a は リスト中央を指しているので、
+  // a->next = NULL とすると list が 前半部分のみになる。
+  // この時、後半の始まりが失われないよう、work変数に記憶しておく。
   w = a->next;
   a->next = NULL;
 
   // 動作確認用
-  // printf("list: %p w: %p\n", list, w);
-  // 前半と後半のリストをマージする
-  return merge(merge_sort_recursive(list), merge_sort_recursive(w));
-}
+  // printf("------- list ------- \n");
+  // show_list(list);
 
-// マージソート (昇順)
-void merge_sort(list_t *list) {
-  list_t *result;
-
-  if (list == NULL) {
-    return;
-  }
-
-  // 動作確認用
-  // printf("%p\n", list->next);
-
-  // リスト全体を対象にする
-  result     = merge_sort_recursive(list->next);
-  list->next = result;
+  // 前半と後半のリストを、再帰的にマージする。
+  return merge(merge_sort(list), merge_sort(w));
 }

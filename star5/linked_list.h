@@ -1,6 +1,11 @@
+/*=====================================================================
+  単方向連結リストの実装のために、
+  定数、構造体、及び、挿入/削除/表示/解放関数の定義
+=====================================================================*/
+
 #define NOT_FOUND -1
 #define SUCCESS    1
-#define FAIL       0
+#define FAILURE    0
 
 // リスト用構造体定義
 typedef struct list {
@@ -22,7 +27,7 @@ int insert_node(list_t *list, int number) {
 
   // メモリ確保に失敗
   if (p == NULL) {
-    return FAIL;
+    return FAILURE;
   }
 
   // 値を代入
